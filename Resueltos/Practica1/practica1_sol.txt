@@ -1,0 +1,160 @@
+1. Para realizar un cambio de contexto, los pasos a seguir son:
+    - Guardar los registros
+    - Guardar el IP
+    - Si el programa a ser cargado no esta en memoria, hacerlo
+    - Cargar los registros del siguiente proceso
+    - Cargar el IP del siguiente proceso
+
+Lo mas importante a tener en cuenta es que, al momento de realizar un cambio de contexto, se debe de guardar el estado del proceso actual, y se debe de cargar el estado del proceso siguiente en el CPU.
+
+2.
+struct PCB {
+    int STAT; // valores posibles KE_RUNNING, KE_READY, KE_BLOCKED, KE_NEW
+    int P_ID; // process ID
+    int PC; // valor del PC del proceso al ser desalojado
+    int RO; // valor del registro R0 al ser desalojado
+    ...
+    int R15; // valor del registro R15 al ser desalojado
+    int CPU_TIME // tiempo de ejecución del proceso
+}
+
+a.
+
+·=·; // asignación entre registros y memoria
+int ke_current_user_time(); // devuelve el valor del cronómetro
+void ke_reset_current_user_time(); // resetea el cronómetro
+void ret(); // desapila el tope de la pila y reemplaza el PC
+void set_current_process(int pid) // asigna al proceso con el pid como el siguiente
+a ejecutarse
+
+void Ke_context_switch(PCB* pcb_0, PCB* pcb_1) {
+    pcb_0->stat = KE_READY;
+    pcb_0->R0 = R0;
+    ...
+    pcb_0->R15 = R15;
+    pcb_0->CPU_TIME = ke_current_user_time();
+
+    ke_reset_current_user_time();
+
+    pcb_1->stat = KE_RUNNING;
+    R0 = pcb_1->R0;
+    ...
+    R15 = pcb_1->15;
+
+    set_current_process(pcb_1->P_ID);
+    ret();
+}
+
+3. Una system call es un pedido al kernel por algún servicio de entre los ofrecidos. Como usuario, hay que especificar qué syscall es la que precisamos utilizar, y pasarle sus parámetros de haberlos al kernel. Para realizar esto, de todos modos, se suele usualmente usar registros en assembler e interrupciones. Es decir, suele ser código no portable, ya que no todos los computadores poseen el mismo formato de asm, y complejo (requiere conocimiento de asm). Por otro lado, las funciones de biblioteca no son system calls directamente, sino que son funciones que hacen uso de las mismas. Es decir, agregan una capa de abstracción a la hora de realizar pedidos al kernel, facilitando interactuar con el sistema y otorgando portabilidad. 
+
+4.  NEW -> RUNNING (al ser el siguiente proceso a cargar no en memoria)(proceso, sch, mem)
+    RUNNING -> BLOCKED (Al pedir E/S)(proceso, sch, I/O device)
+    RUNNING -> READY (Al acabarse su quantum)
+    RUNNING -> TERMINATED (Al terminar de ejecutarse)
+    READY -> RUNNING (Al ser el siguiente proceso a ejecutarse)
+    BLOCKED -> READY (Al terminar el request de I/O)
+
+8. Los resultados mostrados de la variable dato son:
+    Dato padre: 0
+    Dato padre: 0
+    Dato padre: 0
+    Dato hijo: 1
+    Dato hijo: 2
+    Dato hijo: 3
+
+Claramente son diferentes. Esto se da porque, a pesar de ser la misma variable dato en ambos procesos y haberse creado antes del momento de ejecutar la syscall fork(), ambos procesos viven en diferentes areas de memoria. Fork() crea una copia exacta de la memoria del padre en otra página, así que los incrementos de dato por parte del hijo no afecta el valor de dato en el padre.
+
+
+10.
+a. tiki, taka. Nada mas. Y es que queremos que puedan leer y escribirlas y que se actualizen al mismo tiempo.
+
+b. temp.
+
+c.
+
+int main() {
+    share_mem(&tiki);
+    share_mem(&taka);
+    pid_t pid = fork();
+    if (pid == 0) {
+        taka_runner();
+    } else {
+        tiki_taka();
+    }
+
+    exit(0);
+}
+
+12.
+a.
+
+Esta secuencia no es realizable con el sistema operativo descripto ya que:
+
+En el tiempo 1, se estan ejecutando tanto com1 y com2. Es decir, el proceso izq esta en su ultima linea y el der en la primera.
+
+// TODO
+
+13.
+a. Si debe de ser al mismo tiempo, entonces claramente estamos hablando de memoria compartida. De no ser asi, estarian modificando o archivos diferentes o no seria al mismo tiempo.
+b. Si es el mismo archivo pero primero ejecuta uno y luego el otro, utilizan pasaje de mensajes, donde el primero avisa cuando termino y el otro mientras tanto se queda en standby.
+c. Probablemente no querrias utilizar pasaje de mensajes porque de ser asi deberia cortarBordes conocer el pid del proceso ultrasecreto y no querriamos eso. Memoria compartida.
+
+14.
+// TODO
+
+15.
+Los pipes son un metodo de comunicacion entre procesos unidereccional. Es decir, existe un emisor del mensaje y un receptor del mensaje y nada mas. De querer, por ejemplo, modificar un array en simultaneo y que ambos vean las modificaciones que hace el otro, realizarlo con un pipe genera mucho overhead. De todos modos, en funcionalidad puede ser utilizado de la misma forma que por pasaje de mensajes.
+
+16.
+
+Por ejemplo, si el buffer de mensajes del so tiene un tamaño 0, podriamos tener un canal de comunicaciones bloqueante donde el emisor espere a que el otro reciba el mensaje, y otro no bloqueante donde el receptor chequee de vez en cuando si el otro proceso le envio un mensaje, pero si de no ser asi que continue procesando.
+
+Por ejemplo, si un proceso 1 realiza una tarea super larga, mientras que el proceso dos realiza varias pequeñitas y lo unico que hace al recibir el mensaje del proceso 1 es imprimirlo por stdout.
+
+17.
+
+// Deseado: Hijo envia "hola" a padre, y luego padre envia "chau".
+
+pid shared_parent_pid;
+pid shared_child_pid;
+
+mem_share(&shared_parent_pid);
+mem_share(&shared_child_pid);
+
+shared_parent_pid = get_current_pid();
+pid child = fork();
+
+if (child == 0) {
+    shared_child_pid = get_current_pid();
+    bsend(shared_parent_pid, "hola");
+    breceive(shared_parent_pid, ...);
+    exit(OK);
+} else {
+    breceive(shared_child_pid, ...);
+    bsend(shared_child_pid, "chau");
+    exit(OK);
+}
+
+El problema es cuando el padre espera a recibir el "hola", y ejecuta la funcion con el breceive utilizando la variable shared_child_pid. Si no llega el proceso hijo a cambiar la variable antes de que ejecute la instruccion, va a estar esperando infinitamente a que le llegue la señal de otro proceso cualquiera. Es decir, deberia de esperar a que el hijo cambie la variable shared_child_pid antes de esperar el mensaje.
+
+Una forma de solucionarlo es cambiarlo de antemano con el pid child desde el padre. Al realizar el fork, el pid del proceso hijo queda almacenado en child visto desde el proceso padre, entonces podemos cambiar la variable en el else del if.
+
+pid shared_parent_pid;
+pid shared_child_pid;
+
+mem_share(&shared_parent_pid);
+mem_share(&shared_child_pid);
+
+shared_parent_pid = get_current_pid();
+pid child = fork();
+
+if (child == 0) {
+    bsend(shared_parent_pid, "hola");
+    breceive(shared_parent_pid, ...);
+    exit(OK);
+} else {
+    shared_child_pid = pid;
+    breceive(shared_child_pid, ...);
+    bsend(shared_child_pid, "chau");
+    exit(OK);
+}
