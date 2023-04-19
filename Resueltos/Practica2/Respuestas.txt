@@ -1,0 +1,32 @@
+1.
+a) Rafagas de CPU: 0-3, 11-14, 21-23
+   Rafagas de E/S: 3-11, 14-21
+b) Siendo t la unidad de medida de tiempo en este sistema, las rafagas del cpu duraron en orden 3m, 3m y 2m, y las de E/S duraron 8m y 7m.
+
+2.
+a. Round robin otorga a todos los procesos un quantum equitativo, y al no tener prioridades cada proceso viene despues del siguiente sin repetirse. Es decir, se forma una especie de loop entre los diferentes procesos y consiguen la misma cantidad de tiempo en el CPU. Como P0 tiene rafagas cortas de E/S a ciertos dispositivos, constantemente va a estar haciendo cosas con el CPU pero por rafagas muy pequeñas. Por otro lado, P1 será salteado bastante seguido por el algoritmo de round robin al estar bloqueado, mientras que P2 ocuparia por mucho tiempo el CPU durante su rafaga con lo cual muy probablemente sea cortado por el scheduler seguido, y aumentara el waiting time.
+
+En este caso, seria mejor un esquema de prioridades, donde los procesos P0 y P1 tengan mayor prioridad que el P2. De este modo, el proceso P0 que necesita de varias rafacas cortas de CPU entre E/S las recibe seguido, al igual que P1, mientras que P2 recibe el CPU de vez en cuando pero
+
+no se????
+
+3.
+Si con blocked significa que esta esperando entrada y salida, entonces es un round robin normal? Ah no pero pasa de running a blocked siempre? Es un first come first served, donde el proceso que se esta ejecutando actualmente o termina o se blockea por entrada/salida. De ese modo, al finalizar la entrada salida queda en estado ready hasta que lo dejen volver a ejecutar.
+
+4.
+a. Ya que en round robin todos tienen la misma prioridad y reciben el mismo quantum, no existe starvation (todos recibiran eventualmente el CPU).
+b. Se puede producir starvation si constantemente llegan procesos de alta prioridad o todos los de alta prioridad no finalizan nunca. 
+c. Se puede producir starvation si constantemente llegan procesos de corta duracion, en ese caso los procesos de larga duracion nunca llegaran a tener tiempo de CPU.
+d. Lo mismo que en C.
+e. Se puede producir starvation si un proceso nunca termina y no devuelve el CPU.
+f. Se puede producir starvation de la misma forma que en B.
+e. En este caso no se produce starvation, ya que se le puede subir la prioridad a los procesos mas viejos y eventualmente se ejecutaran.
+
+5.
+a. Basicamente se le estaria dando mas tiempo por segundo de procesador a los procesos repetidos.
+b. Como ventajas, los procesos que esten cerca de terminar con un quantum mas terminarian y disminuiria el waiting time. Tambien, procesos intensivos en rafagas de CPU y E/S lograrian llegar a su estado de blocked mas seguido y no acumular waiting time.
+Como desventajas, los procesos con poca utilizacion del CPU y frecuentes E/S, como los interactivos, sufririan de potencialmente tener menos tiempo de CPU y aumentar el waiting time. Esos procesos deberian de potencialmente ser los mas repetidos en el round robin para disminuir el waiting time (constantemente requieren del procesador pero pueden dejarlo libre por unos quantums).
+
+c. Como modificacion, podemos agregar prioridades, que es basicamente lo mismo. Es decir, se pueden ejecutar los procesos que queremos repetir mas seguidos con una prioridad alta, y luego los procesos con largas E/S y rafagas de CPU menos seguido pero mas tiempo.
+
+6.
