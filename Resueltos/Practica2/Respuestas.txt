@@ -155,3 +155,10 @@ b.
 
 waiting time: (3 + 3 + 7 + 5) / 4 = 5.5
 turnaround: (3 + 3 + 7 + 5 + 4 + 3 + 8 + 5) / 4 = 9.5
+
+12.
+
+Por un lado, favoreceria a los procesos que realizan muchas E/S ya que significa que sus rafagas de CPU son mas cortas o utilizan el CPU de vez en cuando solamente, y por ende utilizan una menor cantidad de tiempo de procesador en el pasado reciente.
+Por otro lado, como favorece los procesos que tienen mucha E/S y desfavorece a los CPU intensivos, uno pensaria que existiria riesgo de starvation, pero al favorecer a los intensivos en E/S va a dejar a todos ellos bloqueados y va a haber rafagas de CPU destinadas para los procesos intensivos.
+
+13.
