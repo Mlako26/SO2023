@@ -93,3 +93,9 @@ Primero observemos que claramente no es un FCFS, ya que se desalojan procesos si
 Debe de ser un Shortest remaining job first, ya que primero, cuando esta solo el 1 se ejcuta solo. Luego, cuando llega el 2 a la mitad de la ejecucion del 1, no se ejecuta todavia ya que es una tarea mas larga. Luego, comienza la 2 pero llega la 3, que tiene el mismo size, asi que se desaloja la 2 y corre la 3. Como la 3 pasa a tener menor duracion, se finaliza. Durante la 3 tambien llega la 4, pero como es de size 5 va a ser ejecutada luego de la 2 y luego de la 3. Al finalizar la 3 llega la 5, la cual es la mas corta de las tres tareas restantes, asi que se ejecuta primero, luego la 2 y luego la 4.
 
 8.
+
+a. turnaround: (8 + 4 + 7.6 + 7 + 4 + 1) / 3 = 10.53 milisec
+b. turnaround: (8 + 7 + 1 + 8.6 + 4) / 3 = 9.53
+c. turnaround: (1 + 1 + 4 + 8 + 0.6 + 1 + 4 + 1) / 3 = 6.83
+
+9.
