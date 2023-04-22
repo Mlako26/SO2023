@@ -142,3 +142,16 @@ d.
 Si estamos hablando de procesos interactivos, por ejemplo, estos tienen rafagas de CPU cortas con lo cual serian priorizados por el scheduler con SRTF, pero luego los procesos batch nunca se ejecutarian. Tambien, para los procesos realtime, de ser tales que requieren de uso intensivo del CPU, no seran considerados por el scheduler SRJF si llegasen constantemente trabajos pequeños.
 
 11.
+ 
+a.
+
+  1   3   5   7              20
+|-|-|-|-|-|-|-|--------|-----|
+0   2   4   6          15
+
+P1-P2-P1-P2-P1-P2-P1-P3-P4
+
+b.
+
+waiting time: (3 + 3 + 7 + 5) / 4 = 5.5
+turnaround: (3 + 3 + 7 + 5 + 4 + 3 + 8 + 5) / 4 = 9.5
