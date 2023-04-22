@@ -30,3 +30,66 @@ Como desventajas, los procesos con poca utilizacion del CPU y frecuentes E/S, co
 c. Como modificacion, podemos agregar prioridades, que es basicamente lo mismo. Es decir, se pueden ejecutar los procesos que queremos repetir mas seguidos con una prioridad alta, y luego los procesos con largas E/S y rafagas de CPU menos seguido pero mas tiempo.
 
 6.
+
+FCFS
+
+          10   13       19
+|----------|-|--|-|-----|  P1-P2-P3-P4-P5
+0            11   14
+
+SJF
+
+  1    4                19
+|-|-|--|-----|----------|  P2-P4-P3-P5-P1
+0   2        9
+
+Prioridades sin desalojo
+
+  1               16    19
+|-|-----|----------|--|-|  P2-P5-P1-P3-P4
+0       6            18
+
+Round-robin
+
+          5
+|-|-|-|-|-|-|-|-|-|-|-|-|  P1-P2-P3-P4-P5-P1-P3-P5-P1-P5....-P1-P1-P1
+0         
+
+waiting time P1 = 0 + 4 + 2 + 1 + 1 + 1 = 9
+waiting time P2 = 1
+waiting time P4 = 3
+waiting time P3 = 2 + 3 = 5
+waiting time P5 = 4 + 2 + 1 + 1 + 1 = 9
+
+b.
+
+FCFS: Waiting time promedio: (0 + 10 + 11 + 13 + 14) / 5 = 9.6 milisec
+      Turnaround   promedio: (10 + 11 + 13 + 14 + 19) / 5 = 13.4 milisec
+
+SJF: Waiting time promedio: (0 + 1 + 2 + 4 + 9) / 5 = 3.2 milisec
+     Turnaround   promedio: (1 + 2 + 4 + 9 + 19) / 5 = 7 milisec
+
+Prioridades: Waiting time promedio: (0 + 1 + 6 + 16 + 18) / 5 = 8.2 milisec
+             Turnaround   promedio: (1 + 6 + 16 + 18 + 19) / 5 = 12 milisec
+
+Round-Robin: Waiting time promedio: (9 + 1 + 3 + 5 + 9) / 5 = 5.4 milisec
+             Turnaround   promedio: (19 + 2 + 4 + 7 + 14) / 5 = 9.2 milisec
+
+c. El algoritmo que tiene menor waiting time es el shortest job first, al igual que el turnaround (lo cual tiene sentido ya que turnaround es waiting time + execute time + I/O time).
+
+El segundo mejor vendria a ser round robin.
+
+7.
+
+a.
+
+waiting time: (0 + 7 + 0 + 9 + 0) / 5 = 3.2 milisec
+turnaround: (3 + 13 + 4 + 14 + 2) / 5 = 7.2 milisec
+
+b.
+
+Primero observemos que claramente no es un FCFS, ya que se desalojan procesos sin haber terminado como el P2, ni un round-robin ya que el size del quantum difiere.
+
+Debe de ser un Shortest remaining job first, ya que primero, cuando esta solo el 1 se ejcuta solo. Luego, cuando llega el 2 a la mitad de la ejecucion del 1, no se ejecuta todavia ya que es una tarea mas larga. Luego, comienza la 2 pero llega la 3, que tiene el mismo size, asi que se desaloja la 2 y corre la 3. Como la 3 pasa a tener menor duracion, se finaliza. Durante la 3 tambien llega la 4, pero como es de size 5 va a ser ejecutada luego de la 2 y luego de la 3. Al finalizar la 3 llega la 5, la cual es la mas corta de las tres tareas restantes, asi que se ejecuta primero, luego la 2 y luego la 4.
+
+8.
