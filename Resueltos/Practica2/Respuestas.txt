@@ -177,3 +177,15 @@ El algoritmo puede favorecer como desfavorecer a los trabajos cortos. Si estos f
 
 14.
 
+a.
+
+Datos:
+- Maneja procesos interactivos de varias sucursales bancarias
+- Cada sucursal diferente puede enviar un proceso en caso de robo que debe de ser atendido inmediatamente.
+- Alarmas deben de tener prioridad por sobre el resto de las tareas.
+
+Podriamos tomar un algoritmo de scheduling del tipo multilevel queue (sin feedback). Por un lado, llamemos a los procesos interactivos de prioridad 2, y estos estaran ejecutandose a traves de un round robin normalmente siempre y cuando no hayan procesos alarmas en ese momento. Por otro lado, los procesos alarmas tendran prioridad 1 (mayor prioridad), y los tomaremos como si fuesen tareas realtime (deben de ejecutarse en un tiempo dado y lo antes posible) tambien administradas a traves de roundrobin.
+
+De esta forma, de llegar alguna alarma de algun banco, se pasa a darle toda prioridad a esta alarma, y se ejecuta hasta terminar de avisar a la central policial. De llegar varias alarmas, se le alertara a la central de cada una de ellas ya que poseen el mismo nivel de prioridad. Luego, al finalizar de ejecutarse estos procesos, se retomara con los interactivos de prioridad 2. No se producira starvation ya que solo como mucho habra una alarma por banco, y luego de resolverse se retomara (no llegaran constantes alarmas en cada banco todo el tiempo).
+
+15.
