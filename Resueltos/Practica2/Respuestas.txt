@@ -162,3 +162,18 @@ Por un lado, favoreceria a los procesos que realizan muchas E/S ya que significa
 Por otro lado, como favorece los procesos que tienen mucha E/S y desfavorece a los CPU intensivos, uno pensaria que existiria riesgo de starvation, pero al favorecer a los intensivos en E/S va a dejar a todos ellos bloqueados y va a haber rafagas de CPU destinadas para los procesos intensivos.
 
 13.
+
+a.
+
+El algoritmo de FCFS o FIFO no favorece a ningun trabajo. Esa el la mismisima premisa del algoritmo de scheduling, en el cual el trabajo que llega es el trabajo que se procesa, en ese orden. En ese sentido, desfavorece a los trabajos de duracion corta, y es que aumenta muchisimo el wait time de los mismos si tienen que esperar a otros trabajos mas CPU intensivos.
+
+b.
+
+El algoritmo favorece a los trabajos mas cortos en el sentido en que reduce drasticamente su waiting time. Esto es porque, de haber un quantum adecuado, se cortan antes los procesos que toman mucho tiempo en CPU y se les da el escenario a los cortos. De terminar en ese mismo quantum, por ejemplo, se ahorrarian esperar a que terminase por completo esa tarea larga o si hubiesen mas mejor. De haber 4 tareas largas que llegaron antes que una corta, en FIFO esperaria a terminar las 4 largas, mientras que en roundrobin potencialmente solo 4 quantums.
+
+c.
+
+El algoritmo puede favorecer como desfavorecer a los trabajos cortos. Si estos fuesen realtime o interactivos, con pocas rafagas de CPU y quizas mas E/S, el multilevel feedback queue los prioriza y los ejecuta mas seguido. Mientras que, de ser un proceso relativamente corto de poca prioridad, quizas tarde mas en ejecutarse con respecto a los anteriores. De todos modos, al ser con feedback, estos procesos son capaces de subir su prioridad segun sus tiempos de rafagas de CPU, con lo cual no es tan malo.
+
+14.
+
