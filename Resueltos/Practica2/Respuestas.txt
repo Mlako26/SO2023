@@ -177,3 +177,21 @@ El algoritmo puede favorecer como desfavorecer a los trabajos cortos. Si estos f
 
 14.
 
+15.
+
+Datos:
+- Hay procesos interactivos y procesamiento de datos.
+- Proc de data: Largos E/S, cortas rafagas de CPU muy de vez en cuando.
+- Interactivos: Muchos E/S y rafagas de CPU cortas.
+- Puedo elegir entre FCFS o RR
+
+Queremos que los procesos interactivos estén constantemente en ejecución para que de la sensación de continuidad para los usuarios, siempre y cuando minimicemos el throughput (ready time + running time + I/O time) para todos los procesos.
+
+De elegir FCFS, los procesos se ejecutan en orden de llegada y no se corta su ejecución hasta comenzar su E/S o finalizarse. Entonces, los procesos interactivos estarán constantemente ejecutandose, aunque tendrían ráfagas de CPU cortas, y cuando terminen su E/S las tareas de procesamiento de datos, tendrán el CPU en no mucho tiempo, conseguirán terminar sus cuentas no muy largas, y volveran a realizar otra E/S larga. Ya que el enunciado nos asegura que las cuentas son pequeñas, podemos asumir que estas tareas no interactivas ejecutandose no cortarían la continuidad visual para los usuarios.
+
+Por otro lado, de escoger una política con Round-Robin, podría darse el caso en el que estos procesos no interactivos no terminen sus cuentas en el quantum determinado, y por ende extenderían el throughput (más waiting time). De extender el quantum para que contenga las cuentas de estos procesos en su totalidad, los procesos interactivos también serán capaces de terminar en el plazo de ese quantum alargado (si suponemos que los procesos interactivos utilizan poca CPU a la vez), y con lo cual la politica de scheduling sería lo mismo que un FCFS.
+
+Entonces, elegiría una política de FCFS para este caso.
+
+16.
+
