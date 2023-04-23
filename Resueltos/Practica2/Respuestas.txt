@@ -189,3 +189,35 @@ Podriamos tomar un algoritmo de scheduling del tipo multilevel queue (sin feedba
 De esta forma, de llegar alguna alarma de algun banco, se pasa a darle toda prioridad a esta alarma, y se ejecuta hasta terminar de avisar a la central policial. De llegar varias alarmas, se le alertara a la central de cada una de ellas ya que poseen el mismo nivel de prioridad. Luego, al finalizar de ejecutarse estos procesos, se retomara con los interactivos de prioridad 2. No se producira starvation ya que solo como mucho habra una alarma por banco, y luego de resolverse se retomara (no llegaran constantes alarmas en cada banco todo el tiempo).
 
 15.
+
+Datos:
+- Hay procesos interactivos y procesamiento de datos.
+- Proc de data: Largos E/S, cortas rafagas de CPU muy de vez en cuando.
+- Interactivos: Muchos E/S y rafagas de CPU cortas.
+- Puedo elegir entre FCFS o RR
+
+Queremos que los procesos interactivos estén constantemente en ejecución para que de la sensación de continuidad para los usuarios, siempre y cuando minimicemos el throughput (ready time + running time + I/O time) para todos los procesos.
+
+De elegir FCFS, los procesos se ejecutan en orden de llegada y no se corta su ejecución hasta comenzar su E/S o finalizarse. Entonces, los procesos interactivos estarán constantemente ejecutandose, aunque tendrían ráfagas de CPU cortas, y cuando terminen su E/S las tareas de procesamiento de datos, tendrán el CPU en no mucho tiempo, conseguirán terminar sus cuentas no muy largas, y volveran a realizar otra E/S larga. Ya que el enunciado nos asegura que las cuentas son pequeñas, podemos asumir que estas tareas no interactivas ejecutandose no cortarían la continuidad visual para los usuarios.
+
+Por otro lado, de escoger una política con Round-Robin, podría darse el caso en el que estos procesos no interactivos no terminen sus cuentas en el quantum determinado, y por ende extenderían el throughput (más waiting time). De extender el quantum para que contenga las cuentas de estos procesos en su totalidad, los procesos interactivos también serán capaces de terminar en el plazo de ese quantum alargado (si suponemos que los procesos interactivos utilizan poca CPU a la vez), y con lo cual la politica de scheduling sería lo mismo que un FCFS.
+
+Entonces, elegiría una política de FCFS para este caso.
+
+16.
+
+Datos:
+- Se tiene un proceso interactivo que es el generador de las imagenes digitales. Es interactivo ya que recibe la informacion, la procesa en el CPU y la muestra en pantalla como un video. Entonces, debe de presentarse una continuidad en la E/S para el usuario.
+- Se tiene un proceso que quiere modificar las imagenes de ahora en adelante cambiado el brillo y constraste
+- Idem pero con el zoom.
+
+Observemos que queremos que los últimos 2 procesos se ejecuten con mayor prioridad que el interactivo del video. Esto es porque, pensando en un video, si estamos mostrando en pantalla imagenes en forma continua, y queremos hacer zoom, este debe de aplicarse a la imagen desde el momento en el que se aprieta el botón para adelante. Entonces, apenas lleguen alguno de esos procesos, se deben de atender inmediatamente. 
+
+Para administrar estos procesos de forma eficiente, uno querría quizas pensar en implementar una política de scheduling con 2 colas de prioridad, donde la más prioritaria solo incluiria a estos procesos de edición de imagen, tratados como tareas realtime, mientras que la otra menos prioritaria para la toma y exposición de imagenes. De llegar varias peticiones de edición de video se realizaran en el orden de llegada, y no se dará starvation de ninguna de ellas al tener mayor prioridad que la toma de imagenes. El problema es el starvation de la toma de imagenes. Si constantemente llegan pedidos de edición de imagenes, entonces no se podrán procesar las imagenes. 
+
+Es por esto que considero que la mejor forma de manejar estos procesos es con una política de RR. No queremos que las imagenes se dejen de mostrar y se corte la continuidad del video si editar las imagenes toma mucho, con lo cual hay casos en los cuales FCFS no serviría, y con un quantum adecuado las ediciones no tardarían en verse. Sobretodo teniendo en cuenta que, al ser el proceso 1 interactivo, los procesos 2 y 3 tendrán el CPU constantemente de requerirlo.
+
+17.
+
+
+
