@@ -219,5 +219,19 @@ Es por esto que considero que la mejor forma de manejar estos procesos es con un
 
 17.
 
+Datos:
+- Hay cámaras y alarmas.
+- Hay procesos que leen video (E/S) y procesan la entrada. Luego las guardan en discos del servidor (E/S). 
+- Hay un proceso realtime que es la alarma, y apenas se detecta algo raro se ejecuta con un deadline estricto. 
+- Durante el dia se acumula video crudo de todas las cámaras, y durante la noche un proceso se los comprime para que pesen menos. 
+- Durante la noche, las cámaras no envían todo el tiempo sino que simplemente si se detecta movimiento. Por ende, se procesa poco video y ráfagas cortas.
 
+Queremos encontrar la política de scheduling más adecuada a este sistema. Los objetivos que buscamos son responder a los procesos realtime de las alarmas lo más rápido posible, procesar video todo el tiempo, y luego de noche, realizar procesos batch de compresión de video.
 
+La mejor política de scheduling para este sistema es la de multilevel queue de prioridades. Vamos a tener 3 colas de prioridades, la 1 para las alarmas, la 2 para el procesamiento de video y la 3 para la compresión de video. 
+
+La primera cola se utiliza estrictamente para las alarmas como procesos realtime, y tendrá politica de FCFS. De este modo, apenas llegue una alerta se correrá y finalizará la tarea urgente.
+
+La segunda cola será la de los procesos relacionados a las cámaras. Estos no sufriran de starvation por la primera cola ya que las alarmas no suceden todo el tiempo. Dentro de la cola se ejecutará un roundrobin para que todas las cámaras procesen en simultáneo, y tengan situaciones "justas" de scheduling. ¿Quizas conviene un FIFO? De esto no estoy seguro
+
+Por último, la tercera cola también sera un roundrobin pero destinada para los procesos de compresión de video. Estos procesos solo estarán ejecutándose durante la noche, cuando no están constantemente ejecutando las tareas de las colas con mayor prioridad, con lo cual no sufrirán de starvation. Es round robin ya que no son procesos de ráfagas cortas.
