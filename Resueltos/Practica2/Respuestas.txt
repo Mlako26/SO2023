@@ -195,3 +195,18 @@ Entonces, elegiría una política de FCFS para este caso.
 
 16.
 
+Datos:
+- Se tiene un proceso interactivo que es el generador de las imagenes digitales. Es interactivo ya que recibe la informacion, la procesa en el CPU y la muestra en pantalla como un video. Entonces, debe de presentarse una continuidad en la E/S para el usuario.
+- Se tiene un proceso que quiere modificar las imagenes de ahora en adelante cambiado el brillo y constraste
+- Idem pero con el zoom.
+
+Observemos que queremos que los últimos 2 procesos se ejecuten con mayor prioridad que el interactivo del video. Esto es porque, pensando en un video, si estamos mostrando en pantalla imagenes en forma continua, y queremos hacer zoom, este debe de aplicarse a la imagen desde el momento en el que se aprieta el botón para adelante. Entonces, apenas lleguen alguno de esos procesos, se deben de atender inmediatamente. 
+
+Para administrar estos procesos de forma eficiente, uno querría quizas pensar en implementar una política de scheduling con 2 colas de prioridad, donde la más prioritaria solo incluiria a estos procesos de edición de imagen, tratados como tareas realtime, mientras que la otra menos prioritaria para la toma y exposición de imagenes. De llegar varias peticiones de edición de video se realizaran en el orden de llegada, y no se dará starvation de ninguna de ellas al tener mayor prioridad que la toma de imagenes. El problema es el starvation de la toma de imagenes. Si constantemente llegan pedidos de edición de imagenes, entonces no se podrán procesar las imagenes. 
+
+Es por esto que considero que la mejor forma de manejar estos procesos es con una política de RR. No queremos que las imagenes se dejen de mostrar y se corte la continuidad del video si editar las imagenes toma mucho, con lo cual hay casos en los cuales FCFS no serviría, y con un quantum adecuado las ediciones no tardarían en verse. Sobretodo teniendo en cuenta que, al ser el proceso 1 interactivo, los procesos 2 y 3 tendrán el CPU constantemente de requerirlo.
+
+17.
+
+
+
