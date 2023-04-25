@@ -1,0 +1,40 @@
+mesas = N
+actual = 0
+mutex = sem(1)
+mutex2 = sem(1)
+juego = sem(0)
+mesa = sem(0)
+termine = 0 
+
+cliente() {
+
+    mutex.wait() // Entrada del bar de juegos
+    while (mesas == 0) { // Si no hay lugar
+        mesa.wait()
+    }
+    // Hay al menos una mesa
+    actual++
+    if (actual == 4) {
+        actual = 0
+        mesas--
+        juego.signal(4) // Solo se puede jugar con la mesa llena
+    }
+    mutex.signal()
+
+    juego.wait()
+    jugar()
+
+    // Luego de jugar hay que liberar la mesa
+    // Aca supongo que si jugaron juntos terminan al mismo tiempo
+    // Sino, puede darse que procesos de mesas distintas terminen y no se vacien por completo.
+    // AKA ningun proceso se queda boludeando si los demas terminaron
+
+    mutex2.wait()
+    termine++
+    if (termine == 4) {
+        termine = 0
+        mesas++
+        mesa.signal()
+    }
+    mutex2.signal()
+}

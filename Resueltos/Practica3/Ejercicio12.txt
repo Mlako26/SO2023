@@ -1,0 +1,16 @@
+write = sem(0)
+read = sem(0)
+
+read {
+    read.wait()
+    read()
+    write.signal()
+}
+
+write {
+    while (N > 0) {
+        write()
+        read.signal()
+        write.wait()
+    }
+}
