@@ -1,0 +1,22 @@
+mutex = sem(1)
+elementos = sem(0)
+necesarios = [0,0]
+
+particula(i) { // i es el tipo de particula (0 H, 1 O)
+    bool esperando = false;
+    mutex.wait()
+    if ((i && !necesarios[1] && necesarios[0] == 2) ||
+        (!i && necesarios[1] && necesarios[0] == 1)) {
+            unir()
+            elementos.signal(2)
+    } else if ((i && !necesarios[i]) || (!i && necesarios[i] < 2)) {
+        necesarios[i]++
+        esperando = true;
+    }
+    mutex.signal()
+
+    if (esperando == true) elementos.wait()
+}
+
+Solo pasa un elemento por mutex a la vez. Si es el ultimo para realizar la combinacion (hay dos hidrogenos y es un oxigeno, o es un hidrogeno y ya habia un oxigeno e hidrogeno), entonces se une con los demas y los libera.
+Sino, se fija si es alguno de los elementos que falta. De ser asi, se quedan durmiendo (importante notar que lo hace fuera del mutex, sino no funcionaria el codigo)
