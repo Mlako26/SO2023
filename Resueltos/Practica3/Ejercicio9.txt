@@ -1,0 +1,1 @@
+Se pone una barrera entre medio de las sentencias ai y bi. De este modo, todos los ai se ejecutarán y los procesos se ponen a dormir antes que bi. El último proceso en terminar ai despierta a todos los demás y ejecutan lo que queda del código.

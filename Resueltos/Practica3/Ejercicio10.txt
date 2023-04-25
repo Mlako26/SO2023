@@ -1,0 +1,6 @@
+a.
+Si. Por ejemplo, si foo ejecuta el semWait(S) y bar el semWait(R),
+cuando ambos intenten hacer los siguientes waits se genera un deadlock.
+
+b.
+Si. Por ejemplo, de no darse un deadlock, entonces uno de los dos procesos ingresará en la zona crítica mientras que el otro se queda esperando. Supongamos que foo ingresa y que bar se queda en wait(R). Luego, bar quedará dormido. foo ejecuta la zona crítica y luego de realizar los dos signals realiza el wait(S) y wait(R) nuevamente. Entonces, el proceso bar, a pesar de haber sido levantado, se volverá a dormir en el mismo wait y nunca se ejecutará.

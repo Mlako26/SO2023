@@ -1,0 +1,44 @@
+a.
+
+Contador es un int no necesariamente atómico. Esto es porque solo el prisionero 0 la utiliza.
+
+Luz puede no ser atómica pero su checkeo debe de estar dentro de un semáforo (el mismo que permite solo a un prisionero estar en la sala a la vez).
+
+idem libres con su modificacion.
+
+b.
+
+sala = sem(1)
+bool luz = false
+
+void PrisioneroCero(){
+    contador = 0;
+    while (!libres) {
+        sem.wait()
+        if (!luz){
+            luz = true
+            contador++
+            if(contador == N) libres = true;
+        }
+        sem.signal()
+    }
+}
+
+// Resto de los prisioneros
+void RestoDeLosPrisionero(int i){
+    entreASala = false;
+    while (!libres) {
+        sem.wait()
+        if (luz && !entreASala){
+            entreASala = true
+            luz = false;
+        }
+        sem.signal()
+    }
+}
+
+Este código garantiza EXCL sobre la sala ya que el semáforo comienza en 1 y apenas sale el proceso que estaba adentro manda la señal para que pueda entrar el siguiente. No pueden haber dos procesos en la sala en simultáneo ya que las operaciones wait y signal de los semáforos son atómicas.
+
+c.
+
+Es imporatnte que se cumpla la propiedad de FAIRNESS en nuestra solución ya que necesitamos que todos los procesos escapen y que todos realizen su parte para poder escapar. De no ser así, ninguno escapará o se quedará algún prisionero detrás. Se garantiza que se cumple la propiedad porque las operaciones con los semáforos la cumplen, y apenas se pone en true la variable de libres, como estaban todos los demás procesos esperando en el wait, todos entrarar uno por uno a la zona crítica, saldrán de ella y eventualmente del ciclo (ninguno se quedará durmiendo por siempre).
