@@ -1,0 +1,113 @@
+LOCK-FREEDOM nos dice que si una sección crítica está libre y existe algún proceso que quiera entrar, entonces algún proceso va a entrar.
+
+1.
+
+semA = sem(1)
+semB = sem(0)
+semC = sem(0)
+
+A {
+    semA.wait()
+    ejecutarA()
+    semB.signal()
+}
+B {
+    semB.wait()
+    ejecutarB()
+    semC.signal()
+}
+C {
+    semC.wait()
+    ejecutarC()
+    semA.signal()
+}
+
+Cumple con el LOCK-FREEDOM ya que cualquier proceso que quiera entrar a su zona crítica será levantado de su wait por el proceso anterior.
+
+2.
+
+semA = sem(0)
+semB = sem(2)
+semC = sem(0)
+
+A {
+    semA.wait()
+    ejecutarA()
+    semB.signal(2)
+}
+B {
+    semB.wait()
+    ejecutarB()
+    semC.signal()
+}
+C {
+    semC.wait()
+    semC.wait()
+    ejecutarC()
+    semA.signal()
+}
+
+Cumple con el LOCK-FREEDOM, ya que primero B se ejecuta 2 veces por su valor inicial del semáforo. Como C tiene dos waits, va a esperar a las 2 signals del B. Luego, se ejecuta C y levanta a A. Luego, a manda 2 signals a B y se repite el proceso.
+
+3.
+
+semA = sem(2)
+semB = sem(0)
+semC = sem(0)
+permisoRetirar = sem(1)
+
+A {
+    semA.wait()
+    semA.wait()
+    ejecutarA()
+    semB.signal()
+    semC.signal()
+}
+B {
+    semB.wait()
+    permisoRetirar.wait()
+    ejecutarB()
+    permisoRetirar.signal()
+    semA.signal()
+}
+C {
+    semC.wait()
+    permisoRetirar.wait()
+    ejecutarC()
+    permisoRetirar.signal()
+    semA.signal()
+}
+
+Como el semáforo de A comienza en 2, pasa los 2 waits y se ejecuta primero. Luego, levanta a los dos procesos B y C. Cualquiera de los dos que se ejecute primero, tomará el permiso para retirar y el otro esperará. Luego de ejecutarse uno, le permitirá al otro ingresar. Por último ambos mandan una señal a A para que pase sus dos waits y se loopea denuevo.
+
+4.
+
+semA = sem(2)
+semB = sem(0)
+semC = sem(0)
+i = 1
+
+A {
+    semA.wait()
+    semA.wait()
+    ejecutarA()
+    if (i) {
+        semB.signal(2)
+    } else {
+        semC.signal()
+    }
+    i = 1 - i;
+}
+B {
+    semB.wait()
+    ejecutarB()
+    semA.signal()
+}
+C {
+    semC.wait()
+    ejecutarC()
+    semA.signal()
+    semA.signal()
+}
+
+Primero A se ejecuta y le manda dos señales a B. Antes de quedarse dormido, cambia el i para que sea 0. B se ejecuta dos veces antes de irse a dormir y manda dos señales a A. Luego, A se ejecuta y le envía una señal a C, y antes de dormise cambia el i nuevamente a 1. C le envía dos señales a A y vuelve a dormirse. Y se repite el ciclo.
