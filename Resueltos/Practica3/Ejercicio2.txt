@@ -1,0 +1,2 @@
+El código se fija si x es menor o igual a 5. De serlo, lo incrementa. Sino, lo decrementa.
+El problema viene en que, a pesar de que solo un proceso puede leer la variable X a la vez, cualquiera de los otros la podria estar modificando al mismo tiempo. Por ejemplo, mientras el programa dentro del mutex esta asignando x a y, los otros tres podrian estar incrementando a x, estropeando la lectura realizada por el primero. Es por esto que sufren de race condition. Por ejemplo, si la idea es dejar a x entre 6 y 5, esto podria salirse de ese rango.

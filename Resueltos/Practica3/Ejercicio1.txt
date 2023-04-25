@@ -1,0 +1,12 @@
+a. 
+
+No. En el primer codigo la variable X puede printearse tanto con el valor 1 como 2. En el segundo, puede que el proceso B nunca imprima "a". 
+
+b. 
+
+Lo de antes, pero en el segundo codigo puede ser:
+0 1 2 3
+0 a 1 2 3
+0 1 a 2 3
+0 1 2 a 3
+0 1 2 3 a
