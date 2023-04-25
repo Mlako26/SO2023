@@ -1,0 +1,41 @@
+El siguiente código no cumple con el WAIT-FREEDOM, es decir, que todo proceso que quiere entrar a la zona crítica eventualmente lo hará.
+
+preparado()
+
+mutex.wait()
+count = count + 1
+mutex.signal()
+
+if (count == n) barrera.signal()
+
+barrera.wait()
+critica()
+
+Esto es porque, supongamos que todos los n-1 primeros procesos llegan al barrera.wait() y el proceso número n envia un barrera.signal(). Entonces, uno de los procesos se levantará pero todos los demás no.
+
+Para solucionar esto, se puede modificar que en vez de 1 señal envíe N señales, o que cada proceso que se levanta luego del barrera.wait() levante al próximo.
+
+preparado()
+
+mutex.wait()
+count = count + 1
+mutex.signal()
+
+if (count == n) barrera.signal(N)
+
+barrera.wait()
+critica()
+
+Ó
+
+preparado()
+
+mutex.wait()
+count = count + 1
+mutex.signal()
+
+if (count == n) barrera.signal()
+
+barrera.wait()
+barrera.signal()
+critica()

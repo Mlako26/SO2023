@@ -1,0 +1,14 @@
+Si las operaciones de signal y wait no fuesen atomicamas, se podría dar que varios procesos accedan a recursos o secciones críticas del código en simultáneo cuando no debería de ser así.
+
+Por un lado, observemos el funcionamiento del wait:
+
+wait(s): while (s<=0) dormir(); s- -;
+
+Si su funcionamiento no fuese atomico, entonces varios procesos podrian pasar por el while antes de que ningún otro realize la operación de decrementar. Imaginemos una zona crítica donde solo debería de entrar un proceso a la vez, pero antes de decrementar el semáforo a 0 varios procesos más evalúan la guarda del while y les da false, entonces entrarían todos a la vez.
+
+A su vez, el signal es: 
+
+signal(s): s++; if (alguien espera por s) despertar
+a alguno;
+
+Y esto si no fuese atómico sería un problema por el s++. Para realizar el incremento, se trae de memoria el s, se lo incrementa y se lo guarda. Si todos realizacen el signal a la vez, entonces quizas se lo podrían traer todos antes de que algún otro guarde su propio s incrementado, y al final todos guardan en memoria el mismo s + 1. Esto podría traer problemas con algo que no estoy seguro xd. Quizas necesitabas que te quede un semaforo en N en vez de en 1 y ahora los procesos se quedan en deadlock mas adelante.

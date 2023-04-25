@@ -1,0 +1,29 @@
+Una solución basada solamente en las herramientas atómicas vistas en clase es la siguiente:
+
+atomic<int> count
+count.set(0)
+bool locked = true;
+
+preparado()
+
+if (count.getAndInc() == N) {
+    locked = false;
+}
+
+while(locked) {}
+
+critica()
+
+Como el count getAndInc es atómico, solo 1 proceso va a pasar la guarda del if, y seteará el locked a false. De este modo, todos los procesos se quedarán esperando en el while(true) hasta que el último los saque.
+
+a.
+
+La verdad es que ambos son bastante legibles, depende de a que tipo de respuestas esté uno acostumbrado. Son casi la misma cantidad de lineas.
+
+b.
+
+La eficiencia depende de qué tanto tarde el preparado(). Si es una operación relativamente costosa, entonces utilizar semáforos es mejor para no hacer busy waiting mientras los demás procesos finalizan de ejecutar. Si no lo es, entonces es quizas mejor utilizar variables atómicas ya que reduce el overhead.
+
+c.
+
+Para las operaciones atómicas se requiere que el HW las provea. Es decir, a nivel ISA y ASM tienen que estar esas operaciones que ejecuta el wrapper de C. Por otro lado, para los semáforos se necesita que el SO implemente las operaciones de sleep y wakeup tal que no elija al proceso dormido para ser el siguiente en ejecutar en un context switch.
