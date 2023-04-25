@@ -1,0 +1,19 @@
+N es parámetro e i es parámetro. 
+
+barrera = sem(0)
+remaining = N - 1
+
+proceso(j) { // Donde j es su numero de proceso
+
+    while (i != j) {
+        barrera.wait()
+    }
+
+    ejecutar()
+
+    if (i == N - 1) i = 0
+    remaining--;
+    barrera.signal(remaining + 1)
+} 
+
+Cuando hay N procesos, solo el primero sale del while mientras los otros duermen. Luego de ejecutar, envia N-1 señales y levanta a todos los procesos dormidos, luego de cambiar el i al proximo proceso. De este modo, siempre se estarán levantando exáctamente los procesos que quedan y se ejecutan en órden.
