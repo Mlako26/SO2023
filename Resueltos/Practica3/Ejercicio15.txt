@@ -1,0 +1,65 @@
+cola clientes = {}
+int enTienda = 0
+cola sofa = {}
+bool 
+
+mutex = sem(1)
+mutex2 = sem(1)
+mutex3 = sem(1)
+pararme = sem(1)
+cobrar = sem(1)
+barreraCorte = sem(0)
+barberos = sem(0)
+quieroPagar = sem(0)
+
+barbero() {
+    while(true) {
+        barberos.wait()
+
+        mutex2.wait()
+        sofa.desencolar()
+        barreraCorte.signal(sofa.size())
+        mutex2.signal()
+
+        cortarCabello()
+
+        quieroPagar.signal()
+        aceptarPago()
+    }
+}
+
+cliente(i) {
+    bool meVoy = false // Si no hay lugar
+
+    mutex.wait()
+    if (enTienda < 20) {
+        enTienda++
+    } else {
+        meVoy = true
+    }
+    mutex.signal()
+
+    if (meVoy) exit(0)
+    entrar()
+
+    mutex2.wait()
+    if (sofa.size() == 4) pararme.wait()
+    sentarseEnSofa()
+    sofa.encolar(i)
+    barberos.signal()
+    mutex2.signal()
+
+    while (i != cola.tope) {
+        barreraCorte.wait()
+    }
+    barreraCorte.wait() // Aca esta el proximo a ser cortado
+    sentarseEnSilla()
+
+    quieroPagar.wait()
+    pagar()
+
+    mutex.wait()
+    enTienda--
+    salir()
+    mutex.signal()
+}
