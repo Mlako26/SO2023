@@ -1,0 +1,35 @@
+barrera = sem(0)
+mutex = sem(1)
+list<int> cola = [{}, {}]
+actual = -1 //supongo que no hay especie -1
+actualSex = 0
+
+P(i, sexo) {
+    int puesto = 1;
+
+    mutex.wait()
+    for (int j = 0; j < cola[1-sexo].size(); ++j) {
+        if (cola[1-sexo][j] == i) {
+            cola[1-sexo].remove(j) // (o como funcione)
+            actual = i
+            actualSex = 1-sexo
+            puesto = 0
+            barrera.signal(cola[0].size() + cola[1].size())
+            break()
+        }
+    }
+    mutex.signal()
+    
+    if (puesto == 0) entrar(i);
+
+    for (int j = 0; j < cola[sexo].size(); ++j) {
+        if (cola[sexo][j] == i) puesto++
+    }
+
+    while (puesto > 0 || actual != i || actualSex != sexo) {
+        barrera.wait()
+        if (actual == i && actualSex == sexo) puesto--
+    }
+
+    entrar(i);
+}

@@ -1,0 +1,27 @@
+comida = sem(0)
+cocinar = sem(0)
+mutex = sem(0)
+porciones = 0
+
+antropofago() {
+    while (true) {
+        mutex.wait()
+        if (porciones == 0) {
+            cocinar.signal()
+            comida.wait()
+        }
+        porciones--
+        mutex.signal()
+
+        tomar_porcion()
+        comer()
+    }
+}
+
+cocinero() {
+    while (true) {
+        cocinar.wait()
+        porciones = M
+        comida.signal()
+    }
+}
