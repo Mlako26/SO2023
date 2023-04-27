@@ -1,0 +1,96 @@
+// Manejo de paradas
+colaParada = [{},...,{}] (tamaño N)
+barrera1 = [sem(0),...,sem(0)] (tamaño N)
+barrera2 = [sem(0),...,sem(0)] (tamaño N)
+subir = [sem(0),...,sem(0)] (tamaño N)
+bondiParada = [sem(0),...,sem(0)] (tamaño N)
+
+// Manejo de colectivos
+mutex = [sem(1),...,sem(1)] (tamaño M)
+mutex2 = [sem(1),...,sem(1)] (tamaño M)
+cobrar = [sem(0),...,sem(0)] (tamaño M)
+pasajeros = [0,...,0] (tamaño M)
+quierenBajar = [0,...,0] (tamaño M)
+bajar = [sem(0),...,sem(0)] (tamaño M)
+puedoAvanzar = [sem(1),...,sem(1)] (tamaño M)
+
+colectivero(capacidad, id) {
+    i = 0
+    bajando = 0
+    while (true) {
+        //Por si hay mas de un bondi en la parada
+        bondiParada[i].wait() 
+        detener()
+
+        // Me fijo si hay gente que quiere bajar
+        // mutex2 controla que la gente no solicite parada si no estoy en movimiento
+        mutex2.wait()
+        if (quierenBajar[id] > 0) {
+            puedoAvanzar[id].wait()
+            abrirPuertaTrasera()
+            bajar[id].signal(quierenBajar[id])
+        }
+
+        abrirPuertaDelantera()
+        while (colaParada[i].size() > 0 && pasajeros[id] < capacidad) {
+            barrera1[i].signal(colaParada[i].size())
+            subir[i].wait()
+            marcarTarifa()
+            subir[i].signal()
+
+            mutex[id].wait()
+            pasajeros[id]++
+            mutex[id].signal()
+
+            barrera2[i].signal(colaParada[i].size())
+        } 
+        cerrarPuertaDelantera()
+        puedoAvanzar[id].wait()
+        cerrarPuertaTrasera()
+        mutex2.signal()
+        
+        bondiParada[i].signal()
+        avanzar()
+        paradaActual++
+    }
+}
+
+pasajero(i) {
+    puesto = 1
+
+    mutexP.wait()
+    colaParada[i].encolar(esperar)
+    puesto = colaParada[i].size()
+    mutexP.signal()
+
+    while (puesto > 0) {
+        barrera1[i].wait()
+        puesto--
+        if (puesto > 0) barrera2[i].wait()
+    }
+
+    colaParada[i].desencolar()
+    colectivo = indicarDestino()
+    subir[i].signal()
+    subir[i].wait()
+    pagarConSube()
+
+    viajar()
+
+    dirigirseAPuertaTrasera()
+
+    mutex2.wait()
+    quierenBajar[colectivo]++
+    mutex2.signal()
+
+    bajar[colectivo].wait()
+
+    mutex[colectivo].wait()
+    bajar()
+    pasajeros[colectivo]--
+    quierenBajar[colectivo]--
+    if (quierenBajar[colectivo] == 0){
+        puedoAvanzar[colectivo].signal()
+    } 
+    mutex[colectivo].signal()
+}
