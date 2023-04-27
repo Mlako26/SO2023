@@ -5,10 +5,11 @@ bool modificando = false
 bool quieroModificar = false
 
 searchers(i) {
-
+    mutex1.wait()
     mutex.wait()
     buscando++
     mutex.signal()
+    mutex1.signal()
 
     search(i)
 
@@ -21,6 +22,8 @@ searchers(i) {
 
 inserters(i) {
     mutex1.wait()
+    quieroModificar = true
+    if (buscando > 0) listo.wait()
     insert(i)
     mutex1.signal()
 }
@@ -29,7 +32,7 @@ deleters(i) {
     mutex1.wait()
     quieroModificar = true
     if (buscando > 0) listo.wait()
-    borrando = true
     delete(i)
+    quieroModificar = false;
     mutex1.signal()
 }
