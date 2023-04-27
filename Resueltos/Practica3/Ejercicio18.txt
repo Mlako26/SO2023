@@ -1,0 +1,35 @@
+//Cada heladera: 15 botellas de 1 litro y 10 porrones
+cola colaH = {}
+cola colaC = {}
+
+mutex = sem(1)
+barrera = sem(0)
+barreraTope = sem(0)
+int heladeras = 0
+
+heladera(i) {
+    int botellas = 0
+    int porrones = 0
+
+    mutex.wait()
+    colaH.encolar(i)
+    heladeras++
+    mutex.signal()
+
+    while(colaH.tope() != i) {
+        barrera.wait()
+    }
+
+    enchufarHeladera()
+    abrirHeladera()
+    cerrarHeladera()
+    enfriadoRapido()
+    
+    colaH.desencolar()
+    barrera.signal()
+}
+
+cerveza(i, tipoEnvase) {
+    llegarABar()
+    meMetenEnHeladera()
+}
