@@ -1,0 +1,36 @@
+mutex = sem(1)
+listo = sem(0)
+barrera = sem(0)
+seMete = sem(0)
+vacio = sem(0)
+
+L() {
+    prendas = 0
+
+    while (true) {
+        estoyListo()
+        while (prendas < 10) {
+            listo.signal()
+            seMete.wait()
+            prendas++
+        }
+        lavar()
+        puedenDescargarme()
+        barrera.signal(10)
+        while (prendas > 0) {
+            vacio.wait()
+            prendas--
+        }
+    }
+}
+
+P() {
+    listo.wait()
+
+    entroAlLavarropas()
+    seMete.signal()
+
+    barrera.wait()
+    vacio.signal()
+    saquenmeDeAqui()
+}
