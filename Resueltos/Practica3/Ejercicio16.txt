@@ -1,5 +1,6 @@
 barrera = sem(0)
 mutex = sem(1)
+yaPase = sem(0)
 list<int> cola = [{}, {}]
 actual = -1 //supongo que no hay especie -1
 actualSex = 0
@@ -15,6 +16,7 @@ P(i, sexo) {
             actualSex = 1-sexo
             puesto = 0
             barrera.signal(cola[0].size() + cola[1].size())
+            yaPase.wait()
             break()
         }
     }
@@ -26,10 +28,13 @@ P(i, sexo) {
         if (cola[sexo][j] == i) puesto++
     }
 
+    cola[1-sexo].encolar(i)
+    
     while (puesto > 0 || actual != i || actualSex != sexo) {
         barrera.wait()
         if (actual == i && actualSex == sexo) puesto--
     }
 
+    yaPase.signal()
     entrar(i);
 }
