@@ -1,0 +1,35 @@
+mutex = sem(1)
+mutex1 = sem(1)
+int buscando = 0
+bool modificando = false
+bool quieroModificar = false
+
+searchers(i) {
+
+    mutex.wait()
+    buscando++
+    mutex.signal()
+
+    search(i)
+
+    mutex.wait()
+    buscando--
+    if (quieroModificar && !buscando) listo.signal()
+    mutex.signal()
+
+}
+
+inserters(i) {
+    mutex1.wait()
+    insert(i)
+    mutex1.signal()
+}
+
+deleters(i) {
+    mutex1.wait()
+    quieroModificar = true
+    if (buscando > 0) listo.wait()
+    borrando = true
+    delete(i)
+    mutex1.signal()
+}
