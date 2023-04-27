@@ -2,34 +2,77 @@
 cola colaH = {}
 cola colaC = {}
 
+int heladeras = 0
+int meLevante = 0
+int botellas = 0
+int porrones = 0
+
+
 mutex = sem(1)
+mutex2 = sem(1)
+mutex3 = sem(1)
 barrera = sem(0)
 barreraTope = sem(0)
-int heladeras = 0
+terminamos = sem(0)
+cargar = sem(0)
+botella = sem(0)
+porron = sem(0)
 
 heladera(i) {
-    int botellas = 0
-    int porrones = 0
-
     mutex.wait()
-    colaH.encolar(i)
     heladeras++
+    colaH.encolar(i)
     mutex.signal()
 
     while(colaH.tope() != i) {
         barrera.wait()
+
+        mutex2.wait()
+        meLevante++
+        if (meLevante == heladeras) terminamos.signal()
+        mutex2.signal()
     }
 
     enchufarHeladera()
-    abrirHeladera()
-    cerrarHeladera()
+
+    while (botellas < 15 && porrones < 10) {
+        cargar.wait()
+        abrirHeladera()
+        cargar.wait()
+        cerrarHeladera()
+    }
+
     enfriadoRapido()
     
+    mutex3.wait()
+    botellas = 0
+    porrones = 0
+    mutex3.signal()
+    
+    mutex.wait()
+    heladeras--
     colaH.desencolar()
-    barrera.signal()
+    barrera.signal(heladeras)
+    terminamos.wait()
+    meLevante = 0
+    mutex.finish()
 }
 
 cerveza(i, tipoEnvase) {
+    mutex3.wait()
     llegarABar()
+    if (tipoEnvase == 0 && botellas < 15) botella.signal()
+    if (tipoEnvase = 1 && porrones < 10) porron.signal()
+    mutex3.signal()
+
+    if (tipoEnvase == 0) botella.wait()
+    if (tipoEnvase == 1) porron.wait()
+
+    mutex3.wait()
+    cargar.signal()
+    if (tipoEnvase == 0) botellas++
+    if (tipoEnvase == 1) porrones++
     meMetenEnHeladera()
+    cargar.signal()
+    mutex3.signal()
 }
