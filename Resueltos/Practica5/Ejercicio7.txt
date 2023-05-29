@@ -1,0 +1,90 @@
+a.
+
+write(int sector, void *data) {
+    int sectores = cantidad_sectores_por_pista();
+    int pista = sector / sectores;
+    sector = sector % sectores;
+    
+    mutex.lock()
+
+    OUT(ARM, pista);
+    OUT(SEEK_SECTOR, sector);
+
+    if (!IN(DOR_STATUS)) OUT(DOR_IO, 1);
+    sleep(50);
+
+    while (IN(ARM_STATUS) == 0){}
+    escribir_datos(data);
+    while(IN(DATA_READY) == 0){}
+
+    OUT(DOR_IO, 0);
+    sleep(200);
+
+    mutex.unlock();
+}
+
+b.
+
+int usable = true;
+bool arm_ready = false;
+bool data_ready = false;
+
+void device_init() {
+    request_irq(6, handler6);
+    request_irq(7, handler7);
+    return 0;
+}
+
+void device_remove() {
+    free_irq(6);
+    free_irq(7);
+}
+
+void handler6() {
+    if (IN(ARM_STATUS == 1)) {
+        arm_ready = true;
+    }
+    if (IN(DATA_READY) == 1) {
+        data_ready = true;
+    }
+}
+
+void handler7() {
+    usable = true;
+}
+
+write(int sector, void *data) {
+    int sectores = cantidad_sectores_por_pista();
+    int pista = sector / sectores;
+    sector = sector % sectores;
+    
+    mutex.lock()
+
+    OUT(ARM, pista);
+    arm_read = false;
+    OUT(SEEK_SECTOR, sector);
+
+    if (!IN(DOR_STATUS)) OUT(DOR_IO, 1);
+    usable = false;
+    while (!usable){}
+    usable = false; // Lo hago 2 veces para asegurarme que pasen 50ms
+    while (!usable){}
+    
+
+    while (!arm_ready){}
+    escribir_datos(data);
+    while(!data_ready){}
+    data_ready = false;
+
+    OUT(DOR_IO, 0);
+    usable = false;
+    while (!usable){}
+    usable = false; // Lo hago 2 veces para asegurarme que pasen 50ms
+    while (!usable){}
+    usable = false;
+    while (!usable){}
+    usable = false; // Lo hago 2 veces para asegurarme que pasen 50ms
+    while (!usable){}
+
+    mutex.unlock();
+}
