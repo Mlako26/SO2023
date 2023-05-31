@@ -1,0 +1,28 @@
+Se tiene un disco con capacidad de 128 GB, y bloques de 8 KB. Supongamos un sistema de archivos
+similar a FAT, donde la tabla se ubica desde la posición 0, y cada entrada de la tabla es de 24 B.
+a) ¿Qué tamaño ocupa la tabla?
+b) ¿Cuántos archivos de 10 MB es posible almacenar?
+c) Se sabe que un archivo comienza en el bloque 20. Dada la siguiente FAT, indicar el
+tamaño de dicho archivo.
+
+a. 128gb = 128 * 2^20kb = 2^27 kb.
+
+==> 2^27kb / 2^3kb bloques = 2^24 bloques
+
+La tabla debe de tener todos los bloques. Si cada entrada son 24 bytes, debe de ocupar 24 * 2^24 bytes = 24 * 2^4 mb = 24 * 16 mb = 384mb
+
+-> 384 * 2^10kb / 2^3 kb bloques = 49152 bloques
+
+b. 10mb = 10 * 2^10kb = 10240kb.
+
+==> 10240kb / 8kb bloques = 1280 bloques
+
+Luego, hay en total 2^24 bloques de memoria disponibles, pero hay que restarle la tabla. Como la tabla ocupa 49152 bloques y tenemos 2^24 bloques en total, quedan solamente 16728064 bloques en total. Luego, como cada archivo de 10mb ocupa 1280 bloques, se pueden almacenar
+
+16728064 bloques / 1280 bloques = 13,068.8 archivos --> 13068 archivos
+
+c.
+
+20 -> 21 -> 22 -> 3 -> 4 -> 5 -> EOF
+
+ocupa 7 bloques. No se puede saber exactamente el tamaño del archivo, ya que no sabemos exactamente cuanto ocupa del ultimo bloque, pero como maximo 8kb * 7 = 56 kb.

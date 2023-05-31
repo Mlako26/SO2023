@@ -1,0 +1,16 @@
+1.
+En orden, 
+2,2,2,2,2,2,3,3
+
+2.
+Suponiendo que en ex2 cada indireccion puede tener 512 referencias,
+
+2,2,2,2,2,2,4
+
+3.
+3,4,5
+
+4.
+2, 3
+
+Todo menos 1.

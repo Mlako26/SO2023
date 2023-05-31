@@ -1,0 +1,36 @@
+Un sistema de archivos de UNIX, tipo ext2, tiene bloques de tamaño 4 KB y el direccionamiento a
+bloques de disco (LBA) es de 8 B. A su vez, cada inodo cuenta con 5 entradas directas, dos indirectas
+y una doblemente indirecta.
+a) ¿Cuál es el tamaño máximo de archivo que soporta?
+b) Si el 50 % del espacio en disco está ocupado por archivos de 2 KB, el 25 % por archivos
+de 4 KB y el 25 % restante por archivos de 8 KB, ¿qué porcentaje del espacio en disco
+está desperdiciado? (Considere solo el espacio utilizado en los bloques de datos).
+c) ¿Cuántos bloques es necesario acceder para procesar completo un archivo de 5 MB?
+
+
+bloques = 4kb
+direccionamiento a bloques = 8 bytes.
+inodo = 5 directas, 2 indirectas, 1 doblemente indirecta
+Referencias por bloque = 4kb / 8 bytes = 2^12 / 2^3 = 2^9
+
+a.
+Cada archivo es representado por un inodo. Entonces, para saber el tamaño maximo posible de un archivo, basta con ver la cantidad maxima de bloques referenciables por un inodo.
+5 indirectas + 2 indirectas + 1 doblemente indirecta =
+5 bloques + 2 * 2^9 bloques + 2^9 * 2^9 bloques =
+5 bloques + 2^10 bloques + 2^18 bloques = 263,173 bloques.
+
+Como cada bloque es de tamaño 4kb, se tiene que el maximo tamaño posible de un archivo es 4kb * 263,173 = 1,052,692kb
+
+b.
+
+Como cada bloque es de tamaño 4kb, y los archivos no estan guardados en bloques adyacentes necesariamente, con tal de que los archivos llenen los bloques por completo elimina desperdicio de memoria. Por ejemplo, todos los archivos de exactamente 4kb no desperdician memoria, ya que ocupan el bloque entero y no son propietarios de una particion de bloque, desperdiciando el resto del mismo.
+
+Es por esto que todos los archivos de 4kb y 8kb no desperdician memoria de disco. Por otro lado, todos los archivos de 2kb desperdician memoria, ya que la otra mitad de los bloques que ocupan quedan inutilizables. 
+
+Cada archivo de 2kb desperdicia el 50% de su bloque, 2kb, de espacio de disco. Si el 50% del espacio en disco esta ocupado por archivos de 2kb, entonces el 25% del espacio está siendo desperdiciado.
+
+c.
+
+5mb = 5 * 1024kb = 5120kb
+Luego, como cada bloque es de 4kb, el archivo ocupa exactamente 1280 bloques que hay que procesar. Tambien, hay que sumarle el bloque del inodo del archivo que hay que traer (y si estuviese en algun directorio tambien el inodo del mismo), y luego de los 5 bloques comienzan las indirecciones. Con lo cual, suponiendo que no se encuentra en un directorio diferente al actual, tendriamos 1280 bloques del archivo + 1 bloque del inodo + 2 bloques de indireccion.
+Como la primera indireccion permite almacenar 2^9 punteros a bloques = 512 bloques, necesitamos ambas......... me da fiaca pero hay que tambien usar la doble indireccion, se suman 2 bloques mas. 512*3 ya te da la cantidad de bloques que necesitas.
