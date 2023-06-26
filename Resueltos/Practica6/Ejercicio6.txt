@@ -1,0 +1,14 @@
+a.
+
+En FAT, primero se debe de acceder al directorio root.
+Luego, a partir del directorio root, se encuentra el bloque en donde se encuentra el directorio home, al cual debemos de acceder. Desde home, se debe de buscar la posicion dentro de la tabla FAT donde comienza el archivo y ya esta. Solo queda traer la tabla FAT si es que no esta en memoria y comenzar a procesar los bloques en orden.
+
+En total se deben de acceder a 2 bloques de disco si la tabla FAT ya esta cargada en memoria, y sino 3.
+
+b.
+
+La cantidad de accesos a bloques necesarios para acceder al archivo desde el enlace simbolico son la suma de los necesarios para acceder al enlace y llegar del enlace al inodo del archivo. 
+
+Cuando ya tenemos el inodo del enlace, el mismo contiene la referencia al directorio en donde se encuentra el archivo. Luego, desde el directorio se obtiene el inodo del archivo. Entonces, son 2 accesos.
+
+Para obtener el inodo del enlace, priero hay que acceder al inodo distinguido root, y de alli buscar a pepe.txt. Eso puede tomar cualquier cantidad de accesos a bloques ya que hay que buscarlo linealmente.?????

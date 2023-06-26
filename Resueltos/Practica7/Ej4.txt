@@ -1,0 +1,15 @@
+a. Tenemos un sistema distribuido con n procesos conectados bajo una topologia de anillo con IDs, y queremos elegir como lider al nodo con menor ID.
+
+Un posible protocolo es un LCR con dos etapas:
+
+- Etapa 1: Comienza con todos los nodos enviando su ID hacia el siguiente nodo en el anillo. Luego, por cada ID entrante, cada nodo reenvia por el anillo el minimo entre su propia ID y la que acaba de llegar.
+- Etapa 2: Cuando a un nodo le llega su propia ID, significa que era la menor de todas, y envia al anillo un mensaje indicando que es el lider junto con su ID. Luego, al volver a llegarle ya todos saben que es el lider.
+
+Pensemos la cantidad de mensajes que se envian por ronda y la cantidad de rondas. En cada ronda se envian n mensajes, ya que cada nodo envia el minimo entre su ID y la que recien llega, y como mucho hay n rondas, que es lo que toma en que el minimo ID recorra todo el anillo. Luego, hay O(n2) mensajes.
+
+b.
+
+Ahora queremos disminuir la cantidad de mensajes con otro protocolo por fases, donde se eligen lideres en un vecindario local de cada nodo. Tomemos un nodo inicial, que se fija el ID minimo entre si mismo.
+
+Podria ser un protocolo donde cada nodo envie a ambos vecinos su ID y, contando con las IDs de su vecindario, decidir si es el menos de los tres o no. Si no es el menor de los tres, entonces ya sabe que no va a ser lider y deja de mandar mensajes a no ser que sea replicarlos. En el mejor Luego de esta primera fase, sobreviviran los nodos que saben que eran el minimo en su vecindario y ????????????????????? no se la verdad, la ayuda me marea.
+

@@ -1,0 +1,1 @@
+Eleccion de lider bajo una topologia en malla. No se puede utilizar el de bully denuevo ya que esta todos con todos? La verdad no se entiende muy bien que significan los colores del grafico, asi que lo voy a preguntar mejor.
