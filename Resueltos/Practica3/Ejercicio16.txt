@@ -35,6 +35,6 @@ P(i, sexo) {
         if (actual == i && actualSex == sexo) puesto--
     }
 
-    yaPase.signal()
     entrar(i);
+    yaPase.signal()
 }
