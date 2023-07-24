@@ -236,7 +236,91 @@ Al Crear un proceso hijo, no se copian las paginas hasta que se escriba alguna. 
 
 # SISTEMA DE E/S 
 
+Los dispositivos de E/S permiten la comunicación con el mundo físico exterior a la computadora, almacenar datos, etc. Se componen conceptualmente de:
+- El dispositivo fisico.
+- Un **controlador**, el cual interactua con el SO mediante algun `bus` o `registro`.
+
+### Drivers
+Son componentes del SO que conocen las particularidades del HW con el que hablan. Corren con maximo privilegio y de ellos depende la E/S.
+
+Se comunican con los dispositivos de varias formas:
+- **Polling**: Periodicamente checkea si el dispositivo se comunico. Es sencillo de implementar, pero desperdicia CPU.
+- **Interrupciones**: El dispositivo le avisa al driver cuando se quiere comunicar con una interrupcion. Esto no desperdicia CPU como el **polling** pero si agrega un overhead por los cambios de contexto.
+- **DMA (Direct Memory Access)**: Sirve para transferir grandes volumenes de informacion. Requiere de un controlador de DMA, el cual se encarga de esta transferencia, y al finalizar interrumpe la CPU.
+
+### Subsistema de E/S
+Es el subsistema propio de E/S del SO del cual los drivers forman parte. Se ocupa de proveerle al programador una API sencialla para comunicarse con los dispositivos, como `open()` o `read()`, mientras que los drivers traducen estas operaciones a comandos especificos entendidos por el HW.
+
+Separa los dispositivos en dos **tipos**:
+- **Char Device**: Se transmite informacion byte a byte, como un teclado.
+- **Block Device**: Se transmite informacion en bloque, como un disco rigido.
+
+Se comunica con los mismos para leer, escribir, o ambas a la vez, e invisibilisa sus particularidades para el usuario, como su **tipo**, su **acceso** (secuencial o aleatorio), si son **a/sincronicos**, o su **velocidad de respuesta**.
+
+### Disco
+De los dispositivos mas importantes de E/S esta el `disco duro`. Para mejorar la performance de la E/S al `disco`, buscamos minimizar los movimientos de la cabeza fisica del dispositivo. Es decir, el *seek time*. Esto puede hacerse manejando correctamente la cola de pedidos de E/S.
+
+Como politicas de schedulong de E/S a disco, estan:
+- **FIFO**: Es el esquema mas simple. De todos modos, no ayuda para minimizar los movimientos de la cabeza.
+- **Shortest Seek Time First (SSTF)**: El proximo pedido a atender es el mas cercano a donde esta la cabez en el momento. Mientras que mejora los tiempos de respuesta, puede producir inanicion si constantemente llegan requests de la misma zona del disco.
+- **Scan/Elevator**: Ir primero en un sentido, atendiendo los pedidos que se van encontrando, y luego en el otro. Mientras que evita la inanicion, podria llegar una solicitud para el cilindro inmediatamente anterior pero tendra que esperar a que cambie de direccion.
+En la practica, se mezclan los algoritmos con politicas de prioridades, etc.
+
+Por otro lado, en el aspecto de gestionar el disco, tenemos:
+- **Formateo**: Se ponen unos codigos como prefijo y postfijo a cada sector del disco, los cuales de no tener el valor esperado indican que el sector esta dañado.
+- **Booteo**: Las computadores suelen tener un programa chico en `ROM` que carga algunos sectores del disco a memoria para comenzar a ejecutar.
+- **Bloques dañados**: A veces se manejan por software, en conjunto con el `sisteme de archivos`. Hay otros discos que vienen con sectores extra para reemplazar a los defectuosos.
+
+### Spooling
+Forma de manejar a los dispositivos en un contexto de multiprogramacion, como una impresora. La idea es poner pedidos en una cola, y designar un proceso que los vaya desencolando mientras se hacen.
+
+### Seguridad de los datos
+Para proteger los datos del disco, se pueden realizar copias de seguridad, que implican resguardar todo lo imporante en otro lado. Suele hacerse en cintas. El mayor problema que tienen es que toman mucho tiempo, ya que es copiar todo dos veces. Una estrategia para hacer backups es hacer backups totales cada cierto tiempo, y todos los dias solo resguardar los cambios realizados desde el ultimo backup parcial.
+
+Por otro lado, una alternativa a las copias de seguridad es la redundancia. Un metodo muy comun es `RAID`, *Redundant Array of Inexpensive Disks*. La idea es tener dos discos al mismo tiempo, y realizar cada escritura en ambos. Esto es costoso pero conveniente. Ademas, permite realizar dos lecturas en simultaneo. Hay varios niveles de `RAID` con varias diferencias implementativas y sistemas de proteccion.
+
 # SISTEMAS DE ARCHIVOS 
+
+Un archivo es una secuencia de bytes, sin estructura, identificados con un nombre. Existe un modulo dentro del SO que se encarga de organizar estos archivos en disco: el `sistema de archivos`. Algunos SO soportan solo un tipo de `file system` y otros varios. Para el mismo, un archivo es una lista de bloques + metadata.
+
+Una de las principales tareas del mismo es estructurar la organizacion de los archivos, tanto internamente (la informacion dentro del file) como externamente (cómo se ordenan los archivos). Ademas, suelen soportar una nocion de link, es decir un alias para que un archivo tenga mas de un nombre, y definen que nombres posibles pueden tener.
+
+Otra funcion del `File System` es ocuparse del correcto manejo del *montaje* de una unidad de almacenamiento externo. Es decir, de colocar una nueva, reconocer que esta colocada, y desde donde se pueden leer los archivos y su formato.
+
+La **performance** de un `sistema de archivos` esta determinada por muchos factores, como la tecnologia del disco, las politicas de E/S, los tamaños del bloque, cache, etc.
+
+### Contiguo
+Se colocan los bloques de cada archivo contiguos en el disco. De este modo, las lecturas son extremadamente rapidas, pero de querer quitar el ultimo bloque del archivo podriamos generar fragmentacion externa, o tener que realocar los demas archivos.
+
+### Lista enlazada de bloques
+Esto soluciona los problemas de fragmentacion y realocacion, pero de querer hacer lecturas de bloques aleatorios se debe de recorrer linealmente la lista.
+
+### FAT
+Se tiene una tabla donde por cada bloque hay una entrada donde me dice cual es la ubicacion del proximo. Es decir, se mapea todo el disco en una tabla, donde cada indice es el numero de bloque, y en ese indice se encuentra el numero del proximo bloque del arhcivo. El mayor problema de FAT es que la tabla puede llegar a ser grande, y se requiere que este en memoria para funcionar. Ademas, como hay una sola tabla hay mucha contencion, y de caerse el sistema la tabla modificada se pierde (estaba en memoria).
+
+### Inodos
+Cada archivo tiene uno. Tiene en el mismo los atributos del archivo, como el size, permisos, etc, y luego tiene algunas entradas con las direcciones de los primeros k bloques del archivo. De tener mas, se cuenta con algunas entradas para indirecciones simples, dobles y hasta triples. Estas apuntan a bloques que contienen solamente direcciones a mas bloques del archivo.
+
+El sistema de inodos permite tener en memoria solo los inodos que necesitamos, y no la tabla entera de la FAT.
+
+A su vez, cada directorio tiene su propio inodo, donde sus bloques de datos contienen `DirEntry` con la informacion de los inodos de los archivos/directorios que contiene. Se reserva un inodo distinguido para el *root directory*.
+
+Como links, se pueden implementar tanto `hard` como `soft` links. Los `hard` son un enlace directo a un archivo existente en el sistema de archivos, y todos los liks del mismo archivo tienen el mismo numero de inodo (solo son entradas diferentes en directorios con nombres distintos). Se borra el archivo cuando se eliminan todos los `hard` links que apuntan a el.
+
+Los `soft` links contienen una referencia a otro archivo o directorio en el sistema de archivos. Pueden apuntar a elementos de otros sistemas de archivos. De eliminarse no se afecta el archivo/directorio al que apuntan.
+
+En `ext2`, en particular, se divide el disco en grupos de bloques, donde cada uno contiene un superbloque, con todos los datos del `file system` (como la ubicacion de los datos), y entre varias cosas la tabla de inodos, con punteros a los inodos correspondientes dentro de los bloques de datos del grupo.
+
+### Consistencia
+De cortarse la corriente o colgarse la PC, los datos que todavia no se pasaron a memoria secundaria se pierden. Para solucionar esto, existe la syscal `fsync()` que fuerza al SO a grabar las cosas si o si. Sin embargo, de caerse el sistema durante el grabado, se provee ademas un programa que restaura la consistencia del FS.
+
+La idea es agregarle al FS un bit que indique apagado normal, y si cuando la PC levanta el bit no esta prendido, algo sucedio y se corre este programa.
+
+### Journaling
+Se lleva un registro con los cambios que habria que hacer. Cuando se baja el cache a disco, se actualiza una marca que indica que cambios ya se reflejaron. Cuando se llena el buffer se baja el cache a disco. De caerse el sistema, cuando levanta la PC el SO puede determinar que operaciones quedaron pendientes antes del fallo. A su vez, si se cae el sistema durante una operacion, el sistema puede hacer un `roll-back` y evitar estados de inconsistencia.
+
+### Network File System (NFS)
+Es un protocolo que permite acceder a FS remotos como si fueran locales. La idea es montar el FS remoto a algun punto de un sistema local, y luego se pueden acceder a los archivos de alli sin saber que son remotos. Nacen los *vnodes*, y *virtual file systems*, para que estos archivos de ser abiertos se almacenen con otra informacion.
 
 # SISTEMAS DISTRIBUIDOS 
 
