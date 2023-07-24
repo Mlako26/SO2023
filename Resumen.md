@@ -175,7 +175,64 @@ Hay **n** procesos, cada uno tiene que ejecutar *a(i)* y *b(i)*. Luego, queremos
 
 # GESTION DE MEMORIA 
 
+Para que un programa se ejecute, debe de encontrarse en memoria RAM. De todos modos, con la multiprogramacion, pueden encontrarse varios programas en RAM en simultaneo, y en consecuente puede darse que haya que quitar uno para agregar otro.
 
+Por un lado, existe el `swapping`, que consiste en pasar a disco el espcio de memoria de los procesos que no se esten ejecutando. El problema es que esto es insostenible por los largos tiempos de acceso a la memoria secundaria. Luego, buscamos solo swappear programas en memoria hasta disco duro de ser necesario.
+
+A su vez, necesitamos que las direcciones en los programas sean relativas a su ubicacion en memoria, porque sino cada vez que las carguemos deberian de encontrarse en la misma.
+
+La fragmentacion de memoria es uno de los problemas a solucionar, que genera espacios de la memoria que quedan inutilizables por procesos.
+- Interna: Se le da mas memoria a un proceso de la que utiliza.
+- Externa: Se tiene memoria para atender solicitudes pero no es continua.
+  
+Se intenta solucionar organizando la memoria de distintas formas:
+- A traves de un bitmap, dividiendola en bloques de iguales tamaños, y registrando cuales estan ocupados y cuales no. Es un problema encontrar bloques consecutivos (O(n)).
+- A traves de una lista enlazada, donde cada nodo representa un proceso o bloque libre. Luego, liberar es O(1), y asignar es O(1) si se a donde.
+
+Para asignar bloques, tenemos:
+- **First Fit**: Asigno en el primer bloque que entra. Es rapido pero fragmentacion externa.
+- **Best Fit**: Asigno donde entra mas justo. Es mas lento y tampoco es mucho mejor, ya que genera fragmentacion externa pero con bloques mas pequeños.
+- **Quick Fit**: Es **Best Fit** pero manteniendo una lista de bloques libres con los tamaños mas frequentes.
+
+### Memoria Virtual
+La **Memory Management Unit (MMU)** es la unidad del SO encargada de virtualizar el espacio de direcciones y realizar las traducciones de las mismas. Se ayuda del HW.
+
+- Pongo la direccion en el bus de memoria.
+- MMU traduce la direccion virtual a una fisica.
+- La tabla de traduccion se fija si esta cargado o no.
+- Si no esta, hay que cargarlo.
+- La direccion fisica se pone en el bus que va hacia la RAM.
+- Obtengo el contenido.
+  
+Basicamente, se divide la memoria virtual en paginas, y la memoria fisica en page frames. Luego, la MMU traduce las direcciones virtuales como pagina + offset. Al swappear, lo hace con paginas enteras. Si no se encuentra en memoria una pagina, se produce un page fault que maneja el SO.
+
+Para saber que paginas se encuentran cargadas y cuales no, se tiee una tabla de paginas multinivel, lo cual nos permite no tenerla toda en memoria. En cada entrada se encuentra el Page Frame, el bit de ausencia/presencia, privilegios, dirty, etc.
+
+Hay algunas paginas que son muy importantes y se acceden muy seguido. Para ello, se agrega un poco de cache llamado `TLB` que permite mapear paginas a frames uy rapido, sin consultar con las tablas.
+
+### Reemplazo de paginas
+- **FIFO**: Desalojo las paginas en el orden de entrada.
+- **Second Chance**: Es un **FIFO** donde si la pagina que voy a desalojar fue referenciada, la considero como recien subida y paso a la siguiente.
+- **Not Recently Used**: Desalojo primero las que no fueron ni referenciadas ni modificadas. Luego, las referenciadas pero no modificadas, y por ultimo las modificadas.
+- **Least Recently Used**: Las ultimas paginas que se utilizaron son las mas probables de volver a ser utilizadas.
+
+Estos algortmos tambien se combinan con carga de paginas por adelantado, aprovechando la *localidad de referencia* de los programas.
+
+### Page Faults
+Cuando se emite la interrupcion de `Page Fault`, el kernel checkea si la direccion virtual a la que se queria acceder era valida o si se tenian los permisos para acceder (de no ser asi, se mata al proceso). Luego, se selecciona un page frame libre o se reemplaza alguno ocupado.
+
+Si se swappea, de estar el bit de `dirty` encendido, y estaba modificada, entonces hay que pasarla a disco primero. Luego, se sube la pagina a utilizar. Al finalizar de subirse, se actualiza la tabla de paginas para indicar que esta cargada, y el proceso se desbloquea desde la instruccion que causo el `page fault`.
+
+### Thrashing
+Se llama **thrashing** cuando no alcanza la memoria y constantemente se esta cambiando paginas en memoria.
+
+### Proteccion
+Cada proceso tiene su probpia tabla de paginas. Con lo cual, no tiene forma de acceder a una pagina de otro proceso, ya que mismas direcciones virtuales apuntarian a distintos frames en la memoria fisica.
+
+Tambien estan los segmentos, los cuales son espacios de memoria que la dividen con diferentes atributos y niveles de privilegio. Estos nos son de tamaño fijo, a diferencia de las paginas, y se suelen utilizar en conjunto. Los segmentos a demas son visibles para el programador, pueden solaparse, facilitan la proteccion y brindan espacios de memorias separados al mismo proceso.
+
+### Fork()
+Al Crear un proceso hijo, no se copian las paginas hasta que se escriba alguna. Esto es, cuando uno de los dos procesos escribe alguna, se duplican y cada uno queda con su copia independiente.
 
 # SISTEMA DE E/S 
 
