@@ -55,7 +55,20 @@ Las `señales` son un mecanismo de comunicacion incorporada por sistemas POSIX (
 
 # COMUNICACION INTER-PROCESOS 
 
+La comunicacion sirve para compartir informacion, mejorar la velocidad de procesamiento y modularizar, y puede ser realizada entre procesos en un mismo equipo o remotos. Hay varias formas de IPC.
 
+### Memoria Compartida
+La comunicacion se realiza compartiendo un mismo area de memoria, donde ambos procesos pueden leer o leer/escribir.
+
+### Pipes
+Un pipe es un "pseudo archivo" que habilita una forma de IPC, indicados en linux con el simbolo `|`.
+
+Utilizan la existencia de los *File Descriptors*, los cuales son indices en una tabla donde las posiciones representan instancias de archivos abiertos por el proceso. Cada proceso tiene la suya en la PCB, y son utilizados por el Kernel para saber que archivo tiene abierto cada proceso (y por ende puede leer o escribir).
+Con `open()`, `close()` y `dup2()` podemos modificar la tabla. Ademas, es importante saber que los *File Descriptors* se heredan al crear un `fork()`.
+
+Hay indices predeterminados, donde 0 es el `stdin`, 1 el `stdout` y 2 el `stderr`. Luego, con `read()` y `write()`, dado un *File Descriptor* se puede leer o escribir una cantidad determinada de bytes.
+
+Por ultimo, los **Pipes** hacen uso de estos, redirigiendo la entrada de `stdout` del primer programa a la de `stdin` del segundo. El **pipe** en si es un archivo temporal que sirve como buffer, interpretado como un byte stream. Se crean con la syscall `pipe()`.
 
 # SCHEDULING 
 
