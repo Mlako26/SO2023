@@ -72,7 +72,50 @@ Por ultimo, los **Pipes** hacen uso de estos, redirigiendo la entrada de `stdout
 
 # SCHEDULING 
 
+La politica de scheduling es de las partes mas importantes de un SO, y grandes partes de los esfuerzos por optimizar el rendimiento de un SO se invierten en mejorar la misma.
+
+Los objetivos a mejorar son:
+- **Fairness**: Que cada proceso reciba una dosis "justa" de CPU.
+- **Eficiencia**: Tratar que el CPU nunca descanse.
+- **Carga del sistema**: Minimizar la cantidad de procesos en estado de `listo`.
+- **Response Time**: Minimizar el tiempo de respuesta percibido por los usuarios interactivos.
+- **Latency**: Minimizar el tiempo requerido para que un proceso empiece a dar resultados.
+- **Turnaround**: Minimizar el tiempo total de un proceso hasta terminar.
+- **Throughput**: Maximizar el numero de procesos terminados por unidad de tiempo.
+- **Waiting time**: Minimizar la suma de los periodos en `listo`.
+- **Liberacion de recursos**: Priorizar los procesos con mas recursos asociados.
+Claramente, muchos de estos objetivos son contradictorios, con lo cual se deben de priorizar algunos (por ejemplo, no se puede garantizar la fairness si se priorizan los procesos con mas recursos).
+
+
+El scheduling puede ser `cooperativo` o `con desalojo`. 
+
+De ser el primero, cada proceso puede ocupar la CPU tanto como quiera hasta finalizar de procesar. Esto es bueno de tener tareas con poca E/S, pero de tener mucha o de colgarse, no solo se desperdiciarian rafagas de CPU, sino que podria colgar todo el sistema (nadie lo va a desalojar).
+
+De ser el segundo, `preemtive`, el scheduler utiliza la interrupcion del reloj para decidir si el proceso actual sigue ejecutandose o le toca a otro. Esto es bueno ya que permite el desalojo de E/S bloqueantes y programas que no terminan nunca, y suele mejorar la **Fairness** del sistema, agrega un overhead al momento de realizar los cambios de contexto.
+
+### FIFO
+Un enfoque de tipo `First In First Out` supone todos los procesos iguales, y se ejecutan en el orden en el que llegan. Esto es un problema en el caso en que llegue un proceso que requiera mucha CPU, y demora procesos que en poco tiempo hubiesen ya terminado de procesar.
+
+### Round-Robin
+Este enfoque le otortga un quantum a cada proceso, y alterna entre ellos siguiendo una cola en orden. Un quantum muy largo puede perjudicar el **Response Time** de los sistemas interactivos, pero un quantum muy pequeño genera mucho overhead en el context switch.
+
+### Shortest-Job-First
+Se asocia a cada proceso el largo de su proxima rafaga de CPU y se elige para ejecutar el proceso con menor. De este modo, se minimiza el **Waiting Time** y se mejora el **Throughput**. De todos modos, es imposible saber cuanta rafaga de CPU requiere cada proceso exactamente, aunque se puede aproximar. Ademas, en caso de llegar muchos procesos con rafagas cortas constantemente, se generaria `starvation` de los demas.
+
+### Multiples Colas
+Se asocia cada cola a una prioridad distinta, y a la hora de elegir el proximo proceso la prioridad siempre la tiene la cola con menos quantum. Cuando un proceso no finaliza en su quantum, se lo baja a la siguiente cola con menos prioridad, pero se le asignara mas CPU en el proximo turno. Se puede ademas implementar con `aging`, donde cuanto mas tiempo estuvo el proceso sin terminar mas prioridad tendra, y subiendo la prioridad tambien cada vez que llama a una E/S.
+
+### RT Scheduling
+Para los sistemas de Tiempo Real, donde los procesos tienen *deadlines* para finalizar, se puede utilizar por ejemplo `Earliest-Deadline-First`, donde se priorizan los procesos que se deben de finalizar antes.
+
+### SMP Scheduling
+Con SMP, donde tenemos mas de un procesador y cache, se intenta tratar de utilizar siempre el mismo procesador para cada proceso, `afinidad al procesador`, la cual puede ser blanda o dura. Tambien, se intenta distribuir la carga sobre los procesadores.
+
+Elegir una buena politica de scheduling es dificil, ya que entran en juego muchas variables, distintos tipos de procesos, distintas prioridades y distintos HW. Suele requerir extensas prueba/error.
+
 # SINCRONIZACION 
+
+
 
 # GESTION DE MEMORIA 
 
