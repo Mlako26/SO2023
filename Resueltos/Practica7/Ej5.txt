@@ -1,0 +1,12 @@
+Se tienen m nodos distintos, todos con replicas de una misma base de datos. Existe un lider y supongamos que falla.
+
+a. Proponga un algoritmo para eleccion de un nuevo lider, basandose en el menor ID.
+
+Podemos utilizar como algoritmo el de bully algorithm, aprobechando que estan todos los nodos conectados entre si.
+
+- Un nodo va a empezar la eleccion, supongamos el segundo al mando o el primero que nota la falla del lider, les envia a todos los nodos con IDs menores a el que quiere ser el lider.
+- Si nadie le contesta se declara el lider.
+- Cada nodo al que le llega el mensaje va a repetir el mismo esquema, pero tambien contestandole al nodo que le hablo que el se va a encargar de ser el lider.
+- Si nadie le contesta se declara el lider y broadcastea un mensaje a toda la red declarandose victorioso.
+
+b. En caso de generarse una particion, seguiran siendo grafos completos solo que de menor size, con lo cual pueden ejecutar nuevamente el protocolo de bully en caso de no tener lider. Luego, al reunirse las redes todos los lideres (que tendran las dos menores ids en sus respectivas particiones) envian las signals de bully nuevamente hasta encontrarse el nuevo lider.

@@ -12,7 +12,7 @@ void dad(){
 }
 
 int main(int argc, char const *argv[]){
-    if (arg != 2) {
+    if (argc != 2) {
         exit(EXIT_FAILURE); 
     }
     pid_t pid = fork();

@@ -1,0 +1,41 @@
+1. Por un lado, tendremos dos dispositivos. El detector de movimiento y la cámara. Observemos que la cámara se encontrará apagada siempre y cuando no haya movimiento, y el sensor de movimiento siempre se encontrará encendido. La cámara debe de tener un reloj que indique el tiempo que le queda de encendido, y un registro de control para indicar que el reloj debe de resetearse nuevamente a T. 
+
+El sensor de movimiento tiene que tener una interrupción que avise a la cámara que detectó movimiento. Al hacerlo, el handler debe de utilizar el registro de control de la cámara para setear su reloj a T tiempo restante de encendido, y luego encender a la cámara. 
+
+Por otro lado, la cámara debe de permanecer en estado sleep hasta que sea encendida por el sensor de movimiento, y solo debe de apagarse cuando su reloj llegue a 0.
+
+
+
+semaphore mutex;
+
+int driver_init() {
+    sem_init(&mutex, 1, 1);
+    return IO_OK;
+}
+
+int driver_open() {
+    return IO_OK;
+}
+
+int driver_close() {
+    return IO_OK;
+}
+
+int driver_read(int* data) {
+    sem_wait(&mutex);
+    data = IN(CHRONO_CURRENT_TIME);
+    sem_post(&mutex);
+    return IO_OK;
+}
+
+int driver_write() {
+    sem_wait(&mutex);
+    OUT(CHRONO_CTRL, CHRONO_RESET);
+    sem_post(&mutex);
+    return IO_OK;
+}
+
+int driver_remove() {
+    sem_destroy(&mutex);
+    return IO_OK;
+} 

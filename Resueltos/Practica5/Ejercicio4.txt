@@ -1,0 +1,42 @@
+semaphore mutex;
+semaphore wait;
+
+int driver_init() {
+    sem_init(&mutex, 1, 1);
+    sem_init(&wait, 1, 0);
+    OUT(BTN_STATUS, BTN_STATUS & ~0x2);
+    request_irq(7, handler);
+    return 0;
+}
+
+void handler() {
+    sem_post(wait);
+}
+
+int driver_open() {
+    return 0;
+}
+
+int driver_close() {
+    return 0;
+}
+
+int driver_read(int *data) {
+    sem_wait(mutex);
+    if (IN(BTN_STATUS) & 0x1 == 0) sem_wait(wait);
+    OUT(BTN_STATUS, BTN_STATUS & ~0x2);
+    sem_post(mutex);
+    *data = BTN_PRESSED;
+
+    return 0;
+}
+
+int driver_write(int *data) {
+    return 0;
+}
+
+int driver_remove() {
+    sem_destroy(&mutex);
+    free_irq(7);
+    return 0;
+}

@@ -1,0 +1,6 @@
+a.
+Tenemos un sistema distribuido con tres nodos, donde uno toma los pedidos y se comunica con los otros dos, el de las divisas y el de la cuenta del usuario. Como protocolo de comunicacion podemos utilizar un 2PC con una funcion de rollback en caso de abort, para que se pueda mantener una consistencia en caso de haber cambiado algo.
+
+b.
+
+No es redudante bajo estas condiciones ya que, para mantener consistencia atraves de todo el sistema, antes de finalizar la operacion, ya sea fallida o con success, se debe de mantener consistencia. Entonces, cada subsistema dentro de esta app debe de poder cancelar la operacion y de ser informado en caso de deber cancelarla. Sin un protocolo de comits 2PC o 3PC es imposible esto. 

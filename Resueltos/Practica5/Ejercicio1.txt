@@ -1,0 +1,4 @@
+a. Los drivers son una pieza de sofware que pueden ser añadidas al Sistema Operativo para manejar los dispositivos de E/S.
+c. Es una parte del Sistema Operativo ya que se agrega como módulo, y se ejecutan desde el Kernel.
+e. Sirve como un gestor de interrupciones en el sentido que, de generar interrupciones el aparato de E/S, pueden contener código de Handlers para manejarlas.
+g. Debe de conocer en qué tipo de Sistema Operativo está añadido, ya que debe de conocer la forma de añadirse como módulo y de solicitar System Calls. También, tiene que saber qué tipo de dispositivo controla, cómo hay que leerlo y escribirlo, y qué tipo de interrupciones realiza. Por último, no necesita saber que modelo específico es el dispositivo, simplemente su funcionamiento general.

@@ -1,0 +1,13 @@
+1. El algoritmo basicamente escoge un nuevo lider de la siguiente forma, buscando que sea el de la mayor ID posible:
+
+- Un nodo manda mensajes a los de mayor ID.
+- Los de mayor ID le responden.
+- Con todas las respuestas, elige la de mayor ID y la reenvia a todos los nodos.
+- El nodo lider envia un aceptar
+- En caso de que no se envie un aceptar, se reincia el proceso.
+
+Creo que no resuelve el problema en caso de que se caiga el nodo anfitrion. Es decir, si nos podemos asegurar de que el nodo que envia los mensajes de coordinador no se caiga, entonces el sistema funciona, pero sino podria romperse el sistema de eleccion. 
+
+2. 
+
+El algoritmo que se asemeja mas es el de Bully, en el cual un nodo en particular actua de coordinador y pide ser el lider, a lo cual le responden si no lo es o no le responden. En comparacion al algoritmo seleccionado, es mejor en el sentido en que luego de mandarse el primer mensaje, el coordinador solo tiene que esperar para anunciarse lider. En caso de caerse, podria darse que nunca iba a ser lider, con lo cual el proceso de seleccion seguiria sin problemas. De todos modos, esta algoritmo maneja menor cantidad de mensajes, observar que son como mucho O(n) mensajes, mientras que en bully es O(n2), ya que cada nodo podria mandar mensaje a todos los nodos con ID mas alta.

@@ -1,0 +1,8 @@
+Indicar las acciones que debe tomar el administrador de E/S:
+a) cuando se efectúa un open.
+b) cuando se efectúa un write
+
+XD NO SE
+
+A. Conectar un proceso, asignarle un ID y retornandolo?
+B. Llamar a la funcion de device_write y escribir lo que sea que este en data al dispositivo de e/s.

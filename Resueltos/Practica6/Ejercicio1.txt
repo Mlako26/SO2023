@@ -1,0 +1,8 @@
+Suponer una computadora cuyo disco se accede sin memoria cache y un sistema de archivos FAT.
+Además, en este sistema, la FAT no queda almacenada en la memoria (recordar que lo normal es que
+la FAT se cargue en memoria). ¿Cuántos accesos al disco son necesarios para llegar hasta el último
+bloque de un archivo de N bloques?
+
+Hay que cargar la FAT en memoria, luego hay que realizar operaciones en la FAT hasta conseguir la direccion del ultimo bloque, y luego traerlo a memoria.
+
+2 accesos a disco.

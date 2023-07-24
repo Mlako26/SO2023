@@ -1,0 +1,20 @@
+Suponer que se cuenta con un sistema de archivos basado en inodos y bloques de 4 KB.
+
+a) Si se tiene un archivo de 40 KB, ¿cuántos bloques es necesario leer para procesarlo completamente?
+b) ¿Cuántos bloques es necesario leer si el archivo tiene 80 KB?
+
+Bloques = 4kb
+
+a. Primeramente, como el archivo pesa 40kb, se tiene que ocupa 10 bloques exactamente. Luego, para procesarlo completamente se deberan de procesar cada uno de esos 10 bloques. 10 bloques
+
+Por otro lado, para saber en donde se encuentran esos bloques primero se debe de procesar el bloque correspondiente a su inodo. 1 bloque
+
+Dentro del inodo, suponiendo que tiene la misma estructura que el ejercicio anterior, se tienen 5 referencias directas a los primeros 5 bloques, pero luego se debe de procesar el bloque de indireccion para las siguientes 10. 1 bloque
+
+En total, son 12 bloques.
+
+Si es ext2, es exactamente 11 bloques.
+
+b. En caso de ser 80kb, es decir 20 bloques en total, sigue siendo la misma cantidad ya que cada indireccion tiene 512 referencias a bloques, y entra en la primera indireccion al igual que el inciso anterior.
+
+si es ext2, 12 bloques.

@@ -1,0 +1,62 @@
+semaphore mutex;
+semaphore printing;
+bool noInk = false;
+
+int driver_init() {
+    sem_init(&mutex, 1, 1);
+    sem_init(&printing, 1, 0);
+    OUT(LOC_STATUS, READY);
+    request_irq(HP_FINISHED_INT, handlerFin);
+    request_irq(HP_LOW_INK_INT, handlerLow);
+    return IO_OK;
+}
+
+void handlerFin() {
+    sem_post(printing);
+}
+void handlerLow() {
+    sem_post(printing);
+}
+
+int driver_open() {
+    return IO_OK;
+}
+
+int driver_close() {
+    return IO_OK;
+}
+
+int driver_read(int* data) {
+    return IO_OK;
+}
+
+int driver_write(char* data[2]) { // Pasan desde donde y cuanto leer
+    if (noInk) return IO_ERROR;
+
+    sem_wait(&mutex);
+    OUT(LOC_TEXT_POINTER, data[0]);
+    OUT(LOC_TEXT_SIZE, atoi(*data[1]));
+
+    int counter = 0;
+    bool printed = false;
+    while (!printed && counter < 5) {
+        OUT(LOC_CTRL, START);
+        sem_wait(printing); 
+        if (IN(LOC_CTRL) == FINISHED) printed = true;
+    }
+
+    if (!printed) {
+        noInk = true;
+        return IO_ERROR;
+    }
+    sem_post(&mutex);
+    return IO_OK;
+}
+
+int driver_remove() {
+    sem_destroy(&mutex);
+    sem_destroy(&printing);
+    free_irq(HP_LOW_INK_INT);
+    free_irq(HP_FINISHED_INT);
+    return IO_OK;
+} 

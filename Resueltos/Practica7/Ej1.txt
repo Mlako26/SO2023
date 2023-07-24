@@ -1,0 +1,18 @@
+a. Tenemos A y B conectados, y los siguientes 3 escenarios:
+
+- El nodo B se cae.
+- El enlace entre A y B se cae.
+- B esta muy sobrecargado y su tiempo de respuesta es 100 veces mayor a lo normal.
+
+Queremos saber si A es capaz de discernir entre cada uno de ellos.
+Entre los primeros dos es imposible de disernir. Es decir, A puede enviarle un mensaje a B, y de no llegar respuesta, puede ser tanto que B no hay respondido, o que no le haya llegado el mensaje a B. De todos modos, si el tiempo de respuesta de B es 100 veces mayor a lo usual, siempre se podria tener una cota de cuanto tiempo puede esperar A y de cuanto puede tardar B en responder a nodos, y A puede esperar ese tiempo.
+
+b. Si A recibe un mensaje de D, a traves de B, se puede asumir que D no esta caido?
+
+No. Esto es porque D podria haber mandado el mensaje y caerse antes de que el mismo llegase a A.
+
+c. Si B recibe un mensaje de A y uno de C, se puede saber si A envio su mensaje antes que C, o viceversa?
+
+Depende de la implementacion del sistema, pero en un principio si. Es decir, si solamente se cuenta con los tiempos de llegada de los mensajes a B, o solamente se registraron las llegadas sin los tiempos, entonces B no tiene forma de saber cual fue primero. Quizas tardo uno mas en llegar a pesar de mandarse antes por tener mala conexion, etc.
+
+De todos modos, de utilizarse por ejemplo relojes fisicos sincronizados (o los de internet), podria enviarse ademas del mensaje el tiempo en el cual se envio. En realidad, lo mas importante es tener un mecanismo para poder discernir que paso antes y que paso despues.

@@ -1,38 +1,94 @@
-mutex = sem(1)
-mutex1 = sem(1)
-int buscando = 0
-bool modificando = false
-bool quieroModificar = false
+// Esta implementacion garantiza que al momento de realizar una operacion de lectura, todas las operaciones de escritura registradas a traves del mutex esperarAlOtro previamente, se concreten antes de leer. Asi mantenemos un ordenamiento "temporal" de los eventos y serializacion valida de los threads. Esta es una decision de compromiso; por el caracter concurrente de la tabla, no podemos garantizar una secuencialidad exacta de las operaciones si queremos maximizar la posibilidad de concurrencia de las mismas.
 
-searchers(i) {
-    mutex1.wait()
-    mutex.wait()
-    buscando++
-    mutex.signal()
-    mutex1.signal()
+listo = sem(0)
 
-    search(i)
+// checkeo sirve para el correcto manejo de la llegada de operaciones de lectura.
+checkeo = sem(1)
 
-    mutex.wait()
-    buscando--
-    if (quieroModificar && !buscando) listo.signal()
-    mutex.signal()
+// esperarAlOtro restringe el acceso a la seccion critica para solo una operacion de cualquiera de los dos tipos, lectura y escritura.
+esperarAlOtro = sem(1)
 
+// Cantidad de procesos esperando a modificar la tabla.
+atomic<int> escribiendo = 0
+atomic<int> leyendo = 0
+
+// Si hay alguna operacion de lectura esperando.
+bool quieroLeer = false
+bool quieroEscribir = false
+
+read(i) {
+    // Como el semaforo esta implementado tal que garantiza fairness y starvation-freedom, no hay inanicion para las operaciones de lectura a pesar de darle prioridad a las operaciones de escritura (con esperarAlOtro)
+
+    esperarAlOtro.wait()
+        checkeo.wait()
+        quieroLeer = true
+        checkeo.signal()
+        if (escribiendo > 0) {
+            // Si esto sucede, bloqueo esperarAlOtro globalmente, y deshabilito la realizacion de operaciones de escritura que llegaron despues de esta. Sabemos que va a levantarse porque hay al menos uno escribiendo. Esto lo garantizamos por la seccion critica de checkeo. Antes de que 'escribiendo' se decremente, quieroLeer va a ser true. Notar tambien que no hay problema con que estemos bloqueando operaciones de lectura porque temporalmente tambien tienen que suceder despues de que finalicen las escrituras. A su vez, no es bloqueante para la escritura porque luego de realizarse todas las que llegaron antes, libero los semaforos y pueden inmediatamente comenzar a ejecutarse las escrituras que llegaron despues. Es decir, de lanzarse constantemente operaciones de escritura, no se va a generar un bloqueo hasta que termine la lectura. En el momento en que termina la escritura anterior, de haber otra, comenzara inmediatamente despues, con un retraso chico y acotado, ya que no espero a finalizar para liberar el semaforo.
+            listo.wait() 
+        }
+        quieroLeer = false
+	leyendo++
+    esperarAlOtro.signal()
+
+    leer(i)
+
+    checkeo.wait()
+    leyendo--
+    if (quieroEscribir && !leyendo) {
+        list.signal()
+    }
+    checkeo.signal()
 }
 
-inserters(i) {
-    mutex1.wait()
-    quieroModificar = true
-    if (buscando > 0) listo.wait()
-    insert(i)
-    mutex1.signal()
+write(i) {
+    esperarAlOtro.wait()
+    // Esta operacion va a suceder antes que cualquier lectura que este esperando a esperarAlOtro
+    checkeo.wait()
+    quieroEscribir = true
+    checkeo.signal()
+    if (leyendo > 0) {
+        listo.wait()
+    }
+    quieroEscribir = false
+    escribiendo++
+    esperarAlOtro.signal()
+
+    // La escritura es bloqueante para prevenir problemas de Race Condition
+    mutex_lista.wait()
+    escribir(i)
+    mutex_lista.signal()
+
+    checkeo.wait()
+    escribiendo--
+    if (quieroLeer && !escribiendo) {
+        listo.signal()
+    }
+    checkeo.signal()
 }
 
-deleters(i) {
-    mutex1.wait()
-    quieroModificar = true
-    if (buscando > 0) listo.wait()
-    delete(i)
-    quieroModificar = false;
-    mutex1.signal()
-}
+// Un problema a solucionar es el de la Race Condition. Esto implica que el resultado de las operaciones sea el mismo indispensablemente del orden de ejecucion de estas. Es decir, toda ejecucion deberia dar un resultado equivalente a alguna ejecucion secuencial de los mismos procesos. De todos modos, este es un problema imposible de resolver en el sentido en que por debajo de esta estructura no podemos garantizar que las operaciones comiencen a ejecutar o finalicen su ejecucion en el orden en el que fueron invocadas
+
+De este modo, garantizamos que todas las escrituras que lleguen a registrarse previamente a una opereacion de lectura se ejecuten antes.
+
+Si no hiciesemos esto podriamos tener el siguiente problema de orden temporal:
+
+Orden de invocacion:
+
+incrementar(a1)
+incrementar(a1)
+incrementar(a2)
+_maximo()
+
+Orden de ejecucion posbile:
+
+incrementar(a1)
+incrementar(a2)
+_maximo()
+incrementar(a1)
+
+-> _maximo devuelve que el maximo es a2, cuando nunca lo fue (el maximo es a1 temporalmente).
+
+Nuestra solucion, en cambio, si bien no resuelve el problema temporal de manera exacta, define una temporalidad para la estructura que si se respeta. Es decir, bajo nuestra deficion de temporalidad: una operacion de escritura sucede antes que una de lectura si consigue entrar a la seccion critia de esperarAlOtro primero. Luego, si una operacion de escritura sucede bajo este criterio antes que otra de lectura, se efectuaran los cambios en la tabla antes de leer la misma. Sin embargo, notar que no garantizamos el orden en la otra direccion (puede ejecutarse una operacion de escritura antes de finalizar una lectura previa).
+
+De este modo, tomamos esta decision de compromiso con el objetivo de mantener una linealidad en la ejecucion de las operaciones en la tabla maximizando la concurrencia de los procesos.

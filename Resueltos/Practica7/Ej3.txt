@@ -1,0 +1,5 @@
+Tenemos un algoritmo para escribir un archivo que comparten todos los nodos. En el original, el que quiere escribir les avisa a todos, y al recibir el okay, escribe y les avisa que escriban los mismo. El problema con el algoritmo es que de caerse los nodos entre la notificacion y la escritura, no modificaran el archivo y se perdera la constancia. Para solucionarlo, se propone enviar mensajes de confirmacion de parte de los nodos antes de escribir, con lo cual puede saberse cual lo y hizo y cual no. 
+
+Esto esta bueno, ya que de mantener un log de las operaciones realizadas por cada nodo, de no enviar la confirmacion se puede saber que el mismo se cayo antes de escribir, y de carse luego de la confirmacion pero antes de escribir, al reiniciarse puede ver que no escribio todavia. 
+
+De todos modos, tambien esta la perdida de paquetes, las cuales pueden hacer que se pierdan mensajes y que falle el protocolo. Pero puntualmente para resolver este problema yo creo que si funcionaria quizas.
