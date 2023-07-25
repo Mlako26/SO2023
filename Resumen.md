@@ -441,3 +441,58 @@ Entonces, los contenedores permiten crear y ejecutar aplicaciones en forma aisla
 
 # SEGURIDAD
 
+La **seguridad de la informacion** se basa en la preservacion de la `Confidencialidad`, `Integridad` y `Disponibilidad`. Es decir, que la informacion debe de no ser modificada ni vista indebidamente, y que debe de estar disponible cuando se supone que deberia pasar. La **seguridad informatica** es la seguridad de la informacion en sistemas computacionales.
+
+Estos *sistemas de seguridad* suelen tener tres roles:
+- Sujetos.
+- Objetos.
+- Acciones.
+Las politicas de seguridad definen que sujetos pueden realizar que acciones sobre que objetos.
+
+Se utilizan como principios para gestionar el acceso de los usuarios a los objetos:
+- **Autenticacion**: ¿Sos quien decis ser? Contraseñas, etc.
+- **Autorizacion**: ¿Podes hacer lo que queres hacer?
+- **Auditoria**: Dejo registrado lo que hiciste.
+
+### Criptografia
+Rama de la matematica/informatica que se ocupa del cifrado/descifrado de informacion. Utiliza metodos que permiten que mensajes solo sean leidos por la gente autorizada.
+
+Existen algoritmos de encriptacion *simetricos*, que utilizan la misma clave para encriptar y desencriptar (`Caesar`, `DES`, etc), y *asimetricos* que no (`RSA`).
+
+Las funciones de hash son tales que dados un string de input devuelven otro string modificado, tal que cumpla:
+- *Resistencia a la preimagen*: Dado el hash, es dificil encontrar la clave.
+- *Resistencia a la seguda preimagen*: Es dificil encontrar dos claves con el mismo hash.
+
+El metodo **RSA** es uno de encriptado *asimetrico* que utiliza la dificultad computacional de calcular numeros primos como certificado de seguridad. La idea principal es que cada persona tenga dos claves, una privada y una publica.
+- Para *encriptar* un mensaje, tomo la clave publica del receptor y la utilizo para encriptarlo antes de enviar.
+- Para *desencriptar*, utilizo mi propia clave privada. 
+Uno de los usos de **RSA** es la *firma digital*, la cual implica enviar un archivo + un hash del documento encriptado con mi clave privada, que luego se desencripta con mi publica. Si se desencripta exitosamente yo era el dueño, y ademas si coincide con el archivo no se modifico.
+
+Se puede intentar bypassear algunos sitemas de encriptado con un ataque `replay-attack`, aprovechando que el encriptado se hace antes de enviar. Se lee ese hash y se reenvia, haciendome pasar por la persona.
+
+### Autorizacion
+El **Monitor de referencias** es el mecanismo responsable de mediar entre los sujetos y los objetos cuando intentan interactuar. Para ello, debe de conocer los permisos de estos sujetos por sobre estos objetos, y puede hacerlo con una matriz de `Sujetos` x `Objetos`, donde cada celda indica la acciones permitidas. Un principio muy comun es el de *minimo privilegio*, que dice que los sujetos deben de tener los minimos privilegios para llevar a cabo sus operaciones, y nada mas.
+
+Hay dos esquemas para manejar los atributos de seguridad:
+- **Discretionary Access Control (DAC)**: Los atributos se definen explicitamente, y el dueño decide los permisos. Es el utilizado por UNIX, con SETUID y SETGID.
+- **Mandatory Access Control (MAC)**: Cada sujeto tiene un grado, y los objetos creados heredan el grado del ultimo sujeto que los modifico. Luego, un sujeto puede acceder solo a los objetos con grados menor o iguales a los de el. Utilizado para manejar informacion sensible.
+
+Los **procesos** como sujetos en un principio heredan los permisos del usuario que los corre. Tambien pueden ser los permisos del propietario del programa (como SETUID bit en UNIX).
+
+### Seguridad de Software
+Hay que pensar en ella al momento de `pensar` la aplicacion, de `implementar` el codigo y al `operar` el programa. El lugar mas comun de ataque es el de diseño.
+
+Ataques comunes son:
+- **Buffer Overflow**: En C, de tener un buffer en la pila, el usuario puede sobrepasar el tamaño del buffer y pisar otros datos del stack, como la direccion de retorno. Tambien hay `heap based` buffer overflows.
+- **Control de parametros**: Si no se controla el input del usuario podria ingresar comandos maliciosos o realizar buffer overflows. Se soluciona validandolos o utilizando el minimo privilegio posible.
+- **SQL Injections**: Ataque por mal control de parametros en bases de datos.
+
+### Malware
+El `malware`, o `Malicious Software`, esta diseñado para llevar a cabo acciones indeseados y sin el consentimiento del usuario. Hay de varios tipos, como `keylogers`, `virus`, `troyanos`, etc.
+
+Los principales metodos de infeccion son descargas desde paginas webs, adjuntos por mail, compartir dispositivos de almacenamiento, etc.
+
+Para prevenir infecciones, hay que contar con un antivirus, SO, navegador, etc, actualizados, y sentido comun y uso responsable de la maquina.
+
+### Rol de la confianza
+Dentro de todo esto que abarca la `Seguridad Informatica`, la confianza abarca un rol fundamental. Y esto es porque todas las soluciones que planteamos para prevenir ataques o violacion a los principios de la seguridad de la informacion pueden fallar, pueden no haber sido programadas para nuestro ambiente, puede que no se instalen correctamente en nuestra maquina, etc. De ser incorrecta cualquier politica o procedimiento de seguridad se destruye todo lo demas.
