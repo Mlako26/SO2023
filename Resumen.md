@@ -322,8 +322,122 @@ Se lleva un registro con los cambios que habria que hacer. Cuando se baja el cac
 ### Network File System (NFS)
 Es un protocolo que permite acceder a FS remotos como si fueran locales. La idea es montar el FS remoto a algun punto de un sistema local, y luego se pueden acceder a los archivos de alli sin saber que son remotos. Nacen los *vnodes*, y *virtual file systems*, para que estos archivos de ser abiertos se almacenen con otra informacion.
 
-# SISTEMAS DISTRIBUIDOS 
+# SISTEMAS DISTRIBUIDOS - 1
+
+Un sistema distribuido es un conjunto de recursos conectados que interactuan. Por ejemplo, varias maquinas conectadas en red, un CPU con varias memorias, etc.
+
+Como fortalezas, permite la descentralizacion del procesamiento y de los datos, y paralelismo. De todos modos, la sincronizacion y la coherencia se dificulta.
+
+Para memoria compartida, se puede implementar con:
+- **Hardware**: Tanto con **UMA**, donde todos los procesadores se conectan a una memoria por igual, como **NUMA**, donde la memoria esta repartida en diferentes nodos, y cada procesador tiene acceso mas rapido a la memoria localizada en el suyo.
+- **Software**.
+
+Las arquitecturas de **cliente/servidor** involucran un sistema que da servicios cuando un sistema cliente se lo pide. Como implementaciones, tenemos:
+- **Telnet**: Protocolo y programa que permite conexiones remotas, pero por ello tiene como significado las `conexiones remotas`. La idea es utilizar los recursos y el poder de procesamiento de otro equipo como si estuviesemos utilizandolo.
+- **RPC**: Mecanismo que le permite hacer a los programas (en C) hacer *procedure calls* en forma *remota*. Involucra una serie de bibliotecas que invisibilisan los detalles de la comunicacion y la trasmision de datos. Es sincronico.
+
+### Pasaje de Mensajes
+Es el mecanismo mas comun para comunicacion asincronica.
+Tiene algunos problemas, como:
+- Comunicacion lenta.
+- Se pueden perder mensajes.
+- Hay que manejar la de/codificacion de los datos.
+- Podria darse que se caigan nodos o se parta la red y quede incomunicada alguna parte.
+
+Esta el `Teorema CAP`: En un entorno distribuido, solo se puede tener dos de tres, consistencia, disponibilidad y tolerancia a fallas.
+
+### Sincronizacion
+Para sincronizar las diferentes partes de un sistema distribuido, podemos hacer varias soluciones.
+
+Por un lado, podemos implementar un nodo lider, que coordine la ejecucion de un servicio o tarea. Este lider seria un coordinador de recursos. Este enfoque centralizado tiene el problema de que, de caer el nodo coordinador, se cae todo el sistema, y en que se genera un cuello de botella.
+
+Observemos que un problema grande en este tipo de sistemas es saber que paso antes y que despues, como la toma de un mutex. Sincronizar relojes seria muy caro. Entonces, se puede simplemente intentar ordenar parcialmente los eventos. Para ello, **Lamport** define un *orden parcial no reflexivo*, que dentro de un mismo proceso, se tiene que:
+- Si A es antes que B, A -> B.
+- Si E y R es el envio/recepcion de un mensaje, E -> R.
+- Si A -> B y B -> C, A -> C.
+- Si ni A -> B ni B -> A, entonces son *concurrentes*. 
+Se implementa haciendo que cada procesador tenga un *reloj*, y cada mensaje lleva adosado una lectura de reloj.
+
+Esta el problema del **Acuerdo Bizantino**, donde necesitamos coordinar ejercitos para la hora de un ataque con mensajeros que pueden desaparecer. ¿Como hacemos que todos se coordinen? De aca sale un `Teorema` que dice que si fallan a lo sumo k < n procesos, entonces se puede resolver consenso si n > 3k y la conectividad (min. |nodos| tq G-N no es conexo) es mayor que 2k.
+
+### Clusters
+Es un conjunto de computadoras que trabajan en conjunto. Puede ser para proveer servicios, y pueden tener un scheduler de trabajos comun. Las *grids* son conjuntos de clusters, y las *clouds* son clustes alquilables por capacidad o bajo demanda.
+
+### Scheduling
+Si requerimos de hacer un scheduling comun para un sistema distribuido, entonces tenemos el nivel `local` de cada procesador y otro `global`. El global debe de encargarse de hacer el **mapping**, es decir distribuir las tareas entre procesadores y compartir la carga. 
+
+Existe la **migracion**, donde un procesador sobrecargado envia sus tareas a otro, o donde un procesador libre pide mas tareas.
+
+# SISTEMAS DISTRIBUIDOS - 2
+
+Segun si los procesos o nodos fallan, fallan y se reincorporan, etc, cambian los algoritmos utilizados en sistemas distribuidos.
+
+Para medir la eficiencia de uno de estos algoritmos, se pueden utilizar la cantidad de mensajes enviados, o el cuello de botella que tenga el sistema (como los tipos de fallas que soportan o cantidad de procesos).
+
+### Exclusion mutua distribuida
+- **Token Passing**: Armar un anillo logico entre procesos y circular un token. Solo puedo entrar a la zona critica si tengo el token. El problema es que el token circula cuando nadie quiere entrar tambien.
+- Envio a todos los procesos una solicitud con un timestamp. Solo entro a la seccion critica cuando todos me responden. Los demas responden inmediatamente si no quieren entrar a la seccion critica, o si quieren entrar pero su timestamp es menor que el recibido.
+- **Protocolo de mayoria**: De querer obtener el `lock` de un objeto distribuido en n nodos, le pedimos permiso a mas de la mitad de los nodos. Luego, tomamos la version mas actualizada del archivo, la modificamos en los lugares donde nos dieron el lock, e incrementamos el numero de version. No puede darse que hayan versiones desactualizadas ni dos nodos con el lock al mismo tiempo, porque en ese caso se deberia de poder tener mas de la mitad de los locks en dos lugares a la vez, lo cual es imposible.
+
+### Eleccion de Lider
+Se quiere elegir a un proceso como lider para una tarea.
+
+Si no hay fallas, podemos organizar los procesos en un anillo y que cada uno circule su ID a sus vecinos. Luego, por cada ID que llega se devuelve la mayor comparando con la propia. Cuando a un proceso le llega su ID significa que es *lider* y le avisa a todos los demas. En peor caso son `O(n^2)` mensajes.
+
+### 2PC - Two Phase Commit
+Se utiliza para realizar operaciones en conjunto y que no falte ninguna parte. Se tiene un proceso coordinador, que en la primera fase le pregunta a los demas si estan listos. Si alguno le responde que no o no responde, entonces les dice que aborten. Si todos dicen que si, entonces les dice que operen y buscamos recibir los `ok` de operacion commiteada. Si algun proceso no envia el `ok` o devuelve un `error`, entonces existen para algunos sistemas mecanismos de *roll-back*. Su principal problema es que si se cae el lider se cae todo.
+
+# SISTEMAS DISTRIBUIDOS - 3
+**Distributed File Systems** son tales que sus clientes, servidores y dispositivos de almacenamiento estan en maquinas de un sistema distribuido. Se le presenta a los clientes como un `File System` normal. Existen de dos *modelos*, `Cliente-Servidor` y `Basado en Cluster`.
+
+El primero se basa en un servidor que almacena todos los archivos y metadata en almacenamiento conectado al mismo. Cuando un cliente le pide archivos, se encarga de la autenticacion y obtencion de los mismos. El principal problema es la centralizacion de las operaciones en el servidor, que funciona como cuello de botella. De caerse cae todo el sistema.
+
+El segundo apunta a ser mas resistente a fallas. Se tiene un servidor de metadata y archivos distribuidos de a pedazos en servidores de datos. Luego, el cliente al pedir un archivo, el primer servidor se fija donde se encuentran los pedacitos y los pide (tiene un mapeo de los mismos). Los chunks de cada archivo se replican n veces.
+
+Estos **Sistemas de Archivos Distribuidos** son transparentes si ocultan la ubicacion en la que se almacena un archivo en la red. 
+
+### Archivos
+- *Transparencia de Ubicacion*: El nombre del archivo no revela la ubicacion fisica del mismo.
+- *Independencia de Ubicacion*: El nombre del archivo no cambia cuando la ubiccacion fisica del mismo lo hace.
+
+Los **Esquemas de Nombres** de los archivos en un **DFS** pueden ser:
+- Una mezcla del `hostname` con el nombre local.
+- Montar directorios remotos en directorios locales.
+- Tener una unica estructura global de nombres, que abarca a todos los archivos.
+
+Luego de encontrar el archivo pedido por un cliente, se puede utilizar un *mecanismo de servicio remoto*, donde el que accede al archivo es el servidor y este le transfiere la informacion al usuario. 
+
+Tambien se pueden intentar reducir el trafico de red guardando bloques de disco accedidos recientemente en cache (lo cual puede traer problemas de consistencia). Este cache puede ubicarse en disco, lo cual es mas confiable, o puede estar en memoria, lo cual permite que no se tengan discos en las estaciones de trabajo y el acceso sea mas rapido.
+
+Como politicas de actualizacion del mismo, esta el **Write-Through** o el **Delayed-Write o Write-Back**. La primera es mas confiable pero lenta, mientras que la segunda tiene escrituras rapidas pero se pierden datos si la maquina del usuario se cuelga.
+
+### Consistencia
+Es mi copia local en cache consistente con la copia maestra?
+- Si el usuario quiere saber, entonces inicia un checkeo de validez y el servidor checkea si lo es.
+- Si el servidor lo quiere saber, tiene registrado para cada cliente los archivos cacheados. Luego, reacciona si detecta alguna inconsistencia.
 
 # VIRTUALIZACION 
 
+**Virtualizacion** es la posibilidad de que un conjunto de recursos fisicos de vean como varias copias de recursos logicos. Es decir, usualmente es una computadora realizando el trabajo de varias (maquinas virtuales).
+
+Tiene varias ventajas utilizar maquinas virtuales, como portabilidad, simulacion, aislamiento, proteccion, etc.
+La idea es, en vez de tener un solo kernel de un SO, tener un `Virtual Machine Manager` que soporta varios kernels de distintos SO, los cuales pueden utilizar el HW a traves del mismo.
+
+Se puede **simular**, donde se tiene el estado de la maquina virtual y por cada instruccion, en vez de realmente ejecutarse, se interpreta y se altera el estado. Esto es muy ineficiente, de todos modos, y tiene su complejidad simular interrupciones, concurrencia, etc.
+
+Se puede por otro lado **emular** HW. Es decir, que las operaciones efectivamente se hagan en CPU, pero que todos los componentes se emulen y los pedidos pasen primero por el controlador de maquinas virtuales. Por ejemplo la E/S. De todos modos, las MV corren en modo usuario y se dificulta emular correctamente el SO.
+
+Queremos evitar problemas con:
+- Privilegios.
+- Memoria virtual y encapsulamiento.
+- Interrupciones.
+
+Se agrego soporte a *virtualizacion* en HW para solucionar. En `Intel`, por ejemplo, se tienen modos del procesador VMX root y non-root, para distinguir instrucciones del huesped y del anfitrion. Tambien se agrega la *Virtual Machine Control Structure*, que controla el estado del huesped/anfitrion e indican las interrupciones o E/S de cada huesped. Uno de los problemas de esto es que, de caer una pieza de HW, pueden caer varias MV.
+
+### Contenedores
+A diferencia de tener un anfitrion que administra varias MV con sus SO y Kernels completos, los contenedores comparten el mismo kernel del SO anfitrion, lo que los hace mas ligeros y eficientes en terminos de recursos.
+
+Entonces, los contenedores permiten crear y ejecutar aplicaciones en forma aislada y portatil. Docker es una de las mas conocidas.
+
 # SEGURIDAD
+
