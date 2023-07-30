@@ -1,0 +1,5 @@
+a. Este tipo de ataques no se verian afectados, en el sentido en que todavia se puede sobreescribir el rip para saltar a cuaalquier direccion de codigo al retornar.
+
+b. Esto se veria afectado por ejemplo. De no saber la direccion en donde comienza el stack, no hay forma de saber a donde saltar dentro del stack para comenzar a ejecutar codigo.
+
+c. Esto podria hacerse siempre y cuando no se randomice tambien donde se encuentra la seccion de codigo del programa a la hora de ejecutarse. 

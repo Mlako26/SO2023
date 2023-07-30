@@ -1,0 +1,7 @@
+a. En la leida de input del usuario. Como no se controlan la cantidad de caracteres que ingresara, y en particular nombre se encuentra en el stack, el usuario podria realizar un buffer overflow y pisar la direccion de retorno.
+
+b. El usuario deberia solo de poder controlar la variable nombre, pero de realizar un overflow del buffer tambien el rbp y el rip.
+
+c. Eso no se puede. El buffer overflow pisa hacia "arriba" en la memoria, y eso solo llegaria hasta la direccion de retorno de la funcion saludo.
+
+d. No. Se soluciona utilizando scanf solo leyendo 80 caracteres.

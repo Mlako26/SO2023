@@ -1,0 +1,15 @@
+Suponiendo hash retorna 64 bits, y los resultados estan bien distribuidos:
+
+a. Como puede verificar el sistema si un usuario ingreso su contraseña correctamente, si no la tiene almacenada en el sistema?
+
+Para verificar si la contraseña ingresada es correcta, utiliza la funcion de hash y luego compara el resultado obtenido con el hash almacenado. De este modo, se evita vulnerabilizar la contraseña almacenandola en el sistema directamente.
+
+b. Si bien existen varias cotnraseñas que entregan el mismo valor de hash, que probabilidad hay de acertar el valor de hash almacenado?
+
+Pensemos que, si la funcion de hash esta bien distribuida, entonces la probabilidad de colision con cualquier hash es la misma. Luego, la probabilidad de tener uno de los hashes es 1/2^64.
+
+c. En cuantos años se puede tener un 50% de probabilidad de haber acertado al valor de hash almacenado, dado que pueden probarse mil millones de contraseñas por segundo?
+
+Podemos hacer lo siguiente. Podemos checkear mil millones de contraseñas por segundo, que es 10^9. Luego, haber probado el 50% de las contraseñas es haber probado 2^32 contraseñas. Si por segundo podemos conseguir 10^9 contraseñas, entonces habremos probado por segundo 10^9/2^64 contraseñas, que es 5.42e-11. En un año, se consigue el 0.00171% de las contraseñas, y para llegar al 50% es 292 años.
+
+d. Ahora sabemos que la contraseña es a lo sumo 6 carcateros, y son letras minusculas o digitos. Siendo 10 digitos, y 26 caracteres, luego tenemos 36 elementos posibles por cada posicion, y tenemos 6 posiciones, con lo cual hay que probar 36^6 = 2,176,782,336 contraseñas diferentes. Luego, se puede crackear en menos de 3 segundos.

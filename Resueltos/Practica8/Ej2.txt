@@ -1,0 +1,5 @@
+a. No es seguro, ya que de poder interceptar el hash, y siempre sea el mismo, el atacante podria utilizar ese hash, enviarlo, y robar credenciales.
+
+b.
+
+Como cada vez que se intenta autenticar se elige una seed al azar, la mayoria de las veces el hash que viaja por la red es diferente. Luego, incluso si el atacante pudiese leer el hash(seed + contraseña), no podria utilizarlo para intentar conectarse ya que la seed cambiaria para la proxima. Lo unico que podria intentar hacer el atacante es interceptar el seed y el hash y, conociendo la funcion de hash, intentar hacer fuerza bruta cambiando la contraseña que se le suma a la seed. Esto, por el punto a, no es necesariamente eficiente.

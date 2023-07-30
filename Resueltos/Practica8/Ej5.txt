@@ -1,0 +1,5 @@
+a. El mecanismo que permite hacer esto es el setUID, que permite cambiar el privilegio con el que se esta corriendo el codigo en tiempo de ejecucion. Entonces, load_pass_from debe de tener este setUID encendido, y permite leer este archivo subiendo sus privilegios a root.
+
+b.El problema es el gets. Por como estan distribuidas las variables en el stack, escribir a partir de pass nos permite pisar la direccion de retorno. 
+
+c. Si, porque podrian modificar datos de otros usuarios y eso atentaria contra la integridad de los datos.

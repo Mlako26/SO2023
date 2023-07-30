@@ -1,0 +1,3 @@
+a. Supongo que si hacemos que f, al ser un float, obtenga alguno de los valores de infinito o NaN.
+
+b. Depende de en que contexto este siendo utilizada la funcion y con que valores. Si sabemos que puede darse la situacion en la que lea un valor NaN, o en que alguien ingrese el valor NaN maliciosamente, se devolveria de todos modos un 0 con el return que indicaria que se devolvio un NaN y no hay problema la verdad.

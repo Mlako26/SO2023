@@ -1,0 +1,18 @@
+a.
+
+STACK:
+
+mem+
+
+RIP [8]
+RBP [8]
+realPass [32]
+user.pass [32]
+user.name [32]
+
+mem-
+
+Con la funcion fgets, siempre estamos leyendo sizeof(user), que es un struct de 64 bytes. Luego, el primer gets comienza a escribir en user.name y alcanza hasta el final de user.pass.
+Por otro, lado, el segundo gets comienza a escribir en user.pass y finaliza en realPass. De este modo, el usuario al momento de ingresar la contraseña puede sobrescribir los datos de la contraseña real.
+
+b. Puede colocar en el primer fgets lo que sea, y en el segundo fgets AAAA AAAA AAAA AAAA AAAA AAAA AAAA AAAA AAAA AAAA AAAA AAAA AAAA AAAA AAAA AAAA AAAA AAAA, es decir, 64 bytes de Aes. 

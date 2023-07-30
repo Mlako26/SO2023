@@ -1,0 +1,19 @@
+a. Podemos devolver un directorio y, ademas, ejecutar un segundo comando que nos muestre los contenidos del archivo.
+
+; cat /etc/passwd
+
+b.
+
+." ; cat "/etc/passwd
+
+c.
+
+Como cat no utiliza stdin, podemos utiliazar un pipe en vez.
+
+." | cat "/etc/passwd
+
+d.
+
+Bloquear cualquier tipo de caracter que no sea para un directorio. Es decir, generar una blacklist tal que ningun caracter que nos pueda generar un problema, como ", $, \, ;, |, etc.
+
+Por otro lado, tambien vendria bien checkear que el directorio exista, aunque no es necesario ya. Por ejemplo, recorrer dir de izquierda a derecha con ls a ver si encontramos el directorio que necesitan, en vez de correr el comando con system todo directo.
